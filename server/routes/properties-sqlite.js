@@ -119,7 +119,7 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     const prop = await dbGet(
-      `SELECT p.*, l.name as location_name, pt.name as type_name
+      `SELECT p.*, l.name as location_name, pt.name as type_name, p.transaction_type
        FROM properties p
        LEFT JOIN locations l ON p.location_id = l.id
        LEFT JOIN property_types pt ON p.type_id = pt.id
@@ -144,6 +144,7 @@ router.get('/:id', async (req, res) => {
       bathrooms: prop.bathrooms,
       sqft: prop.sqft,
       description: prop.description,
+      transactionType: prop.transaction_type || 'Sale',
       image: images[0] || null,
       images: images,
       isFeatured: prop.is_featured === 1,
@@ -168,10 +169,13 @@ router.post('/', authenticateToken, async (req, res) => {
     const {
       title, type, city, area, price, bedrooms, bathrooms, sqft,
       description, images, isFeatured, isActive, amenities, highlights,
-      brochureUrl, mapUrl
+      brochureUrl, mapUrl, transactionType
     } = req.body;
 
-    console.log('Creating property with data:', { title, type, city, area, price });
+    console.log('Creating property with data:', { 
+      title, type, city, area, price, transactionType,
+      bedrooms, bathrooms, sqft 
+    });
 
     // Validate required fields
     if (!title || !type || !area || !price) {

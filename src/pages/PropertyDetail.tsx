@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { MobileActionBar } from '@/components/MobileActionBar';
+import { PropertyCard, Property } from '@/components/PropertyCard';
 import { Button } from '@/components/ui/button';
 import { propertiesAPI } from '@/lib/api';
 import { Loader2 } from 'lucide-react';
@@ -31,6 +32,8 @@ const PropertyDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentImage, setCurrentImage] = useState(0);
   const [showAllImages, setShowAllImages] = useState(false);
+  const [similarProperties, setSimilarProperties] = useState<Property[]>([]);
+  const [isLoadingSimilar, setIsLoadingSimilar] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -46,11 +49,67 @@ const PropertyDetail = () => {
       if (data.images && data.images.length > 0) {
         setCurrentImage(0);
       }
+      // Load similar properties after main property is loaded
+      // Use setTimeout to avoid blocking the main property load
+      setTimeout(() => {
+        loadSimilarProperties(data).catch(err => {
+          console.error('Failed to load similar properties:', err);
+        });
+      }, 500);
     } catch (error) {
       console.error('Error loading property:', error);
       navigate('/properties');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadSimilarProperties = async (currentProperty: any) => {
+    try {
+      setIsLoadingSimilar(true);
+      // Filter by same area and transaction type
+      const params: any = {
+        active: true,
+        transactionType: currentProperty.transactionType || 'Sale',
+      };
+      
+      // The backend returns location_name, but we need to use area for filtering
+      // Check both area and location_name fields
+      const areaToFilter = currentProperty.area || currentProperty.location_name;
+      if (areaToFilter) {
+        params.area = areaToFilter;
+      }
+      
+      const data = await propertiesAPI.getAll(params);
+      
+      // Filter out current property and transform to Property format
+      const similar = data
+        .filter((p: any) => String(p.id) !== String(currentProperty.id))
+        .slice(0, 6) // Limit to 6 similar properties
+        .map((prop: any) => ({
+          id: String(prop.id),
+          title: prop.title,
+          type: prop.type || 'Apartment',
+          city: prop.city || 'Hyderabad',
+          area: prop.area || '',
+          price: prop.price,
+          priceUnit: 'onwards',
+          bedrooms: prop.bedrooms,
+          bathrooms: prop.bathrooms,
+          sqft: prop.sqft,
+          image: prop.image || prop.images?.[0] || '',
+          imageCount: prop.images?.length || 0,
+          isFeatured: prop.isFeatured,
+          isVerified: true,
+          brochureUrl: prop.brochureUrl,
+        }));
+      
+      setSimilarProperties(similar);
+    } catch (error) {
+      console.error('Error loading similar properties:', error);
+      setSimilarProperties([]);
+    } finally {
+      setIsLoadingSimilar(false);
     }
   };
 
@@ -472,6 +531,43 @@ const PropertyDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Similar Properties Section */}
+        {similarProperties.length > 0 && (
+          <div className="container py-8">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Similar Properties in {propertyData.area}
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Other {propertyData.transactionType} properties in {propertyData.area}, {propertyData.city}
+              </p>
+              
+              {isLoadingSimilar ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <span className="ml-3 text-gray-600">Loading similar properties...</span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {similarProperties.map((prop) => (
+                    <PropertyCard key={prop.id} property={prop} />
+                  ))}
+                </div>
+              )}
+              
+              {similarProperties.length > 0 && (
+                <div className="mt-6 text-center">
+                  <Link to={`/properties?intent=${propertyData.transactionType === 'Sale' ? 'buy' : 'rent'}&area=${encodeURIComponent(propertyData.area)}`}>
+                    <Button variant="outline" className="px-6">
+                      View All {propertyData.transactionType} Properties in {propertyData.area}
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </main>
 
       <Footer />
