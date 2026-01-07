@@ -46,16 +46,18 @@ const Properties = () => {
   useEffect(() => {
     loadProperties();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [intent, typeParam]);
+  }, [intent, typeParam, selectedArea, selectedType]);
 
   const loadProperties = async () => {
     try {
       setIsLoading(true);
       const params: any = { active: true };
       
-      if (intent === 'buy' || intent === 'rent') {
-        // For now, we'll show all active properties
-        // You can add an intent field to properties later
+      // Map intent to transaction type
+      if (intent === 'buy') {
+        params.transactionType = 'Sale';
+      } else if (intent === 'rent') {
+        params.transactionType = 'Rent';
       }
       
       if (typeParam) {

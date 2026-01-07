@@ -34,6 +34,7 @@ const PropertyForm = () => {
     description: '',
     brochureUrl: '',
     mapUrl: '',
+    transactionType: 'Sale',
     isFeatured: false,
     isActive: true,
     amenities: [] as string[],
@@ -69,6 +70,7 @@ const PropertyForm = () => {
         description: property.description || '',
         brochureUrl: property.brochureUrl || '',
         mapUrl: property.mapUrl || '',
+        transactionType: property.transactionType || 'Sale',
         isFeatured: property.isFeatured || false,
         isActive: property.isActive !== undefined ? property.isActive : true,
         amenities: property.amenities || [],
@@ -164,6 +166,7 @@ const PropertyForm = () => {
         bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : 0,
         sqft: formData.sqft ? parseInt(formData.sqft) : 0,
         description: formData.description,
+        transactionType: formData.transactionType,
         images: images,
         isFeatured: formData.isFeatured,
         isActive: formData.isActive,
@@ -289,6 +292,21 @@ const PropertyForm = () => {
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
+              <label className="text-sm font-medium mb-2 block">Transaction Type *</label>
+              <select
+                name="transactionType"
+                value={formData.transactionType}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl border border-border bg-card"
+                required
+              >
+                <option value="Sale">Sale</option>
+                <option value="Rent">Rent</option>
+                <option value="Lease">Lease</option>
+                <option value="PG">PG</option>
+              </select>
+            </div>
+            <div>
               <label className="text-sm font-medium mb-2 block">Price (₹) *</label>
               <Input
                 name="price"
@@ -300,20 +318,21 @@ const PropertyForm = () => {
                 required
               />
             </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Price Unit</label>
-              <select
-                name="priceUnit"
-                value={formData.priceUnit}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card"
-              >
-                <option value="onwards">Onwards</option>
-                <option value="negotiable">Negotiable</option>
-                <option value="all inclusive">All Inclusive</option>
-                <option value="per sqft">Per Sq.ft</option>
-              </select>
-            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-2 block">Price Unit</label>
+            <select
+              name="priceUnit"
+              value={formData.priceUnit}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-border bg-card"
+            >
+              <option value="onwards">Onwards</option>
+              <option value="negotiable">Negotiable</option>
+              <option value="all inclusive">All Inclusive</option>
+              <option value="per sqft">Per Sq.ft</option>
+            </select>
           </div>
 
           <div className="grid sm:grid-cols-3 gap-4">

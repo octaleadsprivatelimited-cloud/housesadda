@@ -87,6 +87,7 @@ export async function initDatabase() {
         bathrooms INTEGER DEFAULT 0,
         sqft INTEGER DEFAULT 0,
         description TEXT,
+        transaction_type TEXT DEFAULT 'Sale',
         is_featured INTEGER DEFAULT 0,
         is_active INTEGER DEFAULT 1,
         amenities TEXT,
@@ -99,6 +100,22 @@ export async function initDatabase() {
         FOREIGN KEY (type_id) REFERENCES property_types(id)
       )
     `);
+    
+    // Add transaction_type column if it doesn't exist (for existing databases)
+    try {
+      // Check if column exists by trying to query it
+      await dbGet('SELECT transaction_type FROM properties LIMIT 1');
+    } catch (e) {
+      // Column doesn't exist, add it
+      try {
+        await dbRun(`ALTER TABLE properties ADD COLUMN transaction_type TEXT DEFAULT 'Sale'`);
+        // Update existing properties to have 'Sale' as default
+        await dbRun(`UPDATE properties SET transaction_type = 'Sale' WHERE transaction_type IS NULL`);
+        console.log('✅ Added transaction_type column to properties table');
+      } catch (alterError) {
+        console.log('Note: transaction_type column may already exist');
+      }
+    }
 
     await dbRun(`
       CREATE TABLE IF NOT EXISTS property_images (

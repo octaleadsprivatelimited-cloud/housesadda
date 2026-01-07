@@ -62,17 +62,22 @@ export const propertiesAPI = {
     area?: string;
     featured?: boolean;
     active?: boolean;
+    transactionType?: string;
   }) => {
     const queryParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          queryParams.append(key, String(value));
+          // Convert boolean to string 'true' or 'false'
+          const stringValue = typeof value === 'boolean' ? String(value) : String(value);
+          queryParams.append(key, stringValue);
         }
       });
     }
     const query = queryParams.toString();
-    return apiRequest(`/properties${query ? `?${query}` : ''}`);
+    const url = `/properties${query ? `?${query}` : ''}`;
+    console.log('🌐 API Call:', url);
+    return apiRequest(url);
   },
 
   getById: async (id: string) => {

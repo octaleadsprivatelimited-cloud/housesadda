@@ -16,10 +16,18 @@ async function getPropertyImages(propertyId) {
 // Get all properties
 router.get('/', async (req, res) => {
   try {
-    const { search, type, city, area, featured, active } = req.query;
+    const { search, type, city, area, featured, active, transactionType } = req.query;
+    
+    // Debug logging
+    console.log('📥 GET /properties - Raw query:', req.query);
+    console.log('📥 GET /properties - Parsed params:', {
+      search, type, city, area, featured, active, transactionType,
+      transactionTypeType: typeof transactionType,
+      transactionTypeTruthy: !!transactionType
+    });
     
     let query = `
-      SELECT p.*, l.name as location_name, pt.name as type_name
+      SELECT p.*, l.name as location_name, pt.name as type_name, p.transaction_type
       FROM properties p
       LEFT JOIN locations l ON p.location_id = l.id
       LEFT JOIN property_types pt ON p.type_id = pt.id
@@ -51,15 +59,30 @@ router.get('/', async (req, res) => {
       query += ' AND p.is_active = ?';
       params.push(active === 'true' ? 1 : 0);
     }
-
+    if (transactionType && String(transactionType).trim() !== '' && String(transactionType).trim() !== 'undefined') {
+      const filterValue = String(transactionType).trim();
+      query += ' AND p.transaction_type = ?';
+      params.push(filterValue);
+      console.log('✅ Filtering by transaction_type:', filterValue);
+    } else {
+      console.log('⚠️  Skipping transaction_type filter - value:', transactionType);
+    }
+    
     query += ' ORDER BY p.created_at DESC';
+    
+    console.log('📊 Final SQL:', query.replace(/\s+/g, ' ').trim());
+    console.log('📊 Final query params:', params);
 
     const properties = await dbAll(query, params);
+    console.log(`📦 Found ${properties.length} properties from database`);
+    if (transactionType && properties.length > 0) {
+      console.log(`   First property transaction_type: "${properties[0].transaction_type}"`);
+    }
 
     // Get images for each property
     const formattedProperties = await Promise.all(properties.map(async (prop) => {
       const images = await getPropertyImages(prop.id);
-      return {
+        return {
         id: prop.id,
         title: prop.title,
         type: prop.type_name,
@@ -70,6 +93,7 @@ router.get('/', async (req, res) => {
         bathrooms: prop.bathrooms,
         sqft: prop.sqft,
         description: prop.description,
+        transactionType: prop.transaction_type || 'Sale',
         image: images[0] || null,
         images: images,
         isFeatured: prop.is_featured === 1,
@@ -177,11 +201,12 @@ router.post('/', authenticateToken, async (req, res) => {
     const result = await dbRun(
       `INSERT INTO properties 
        (title, location_id, type_id, city, price, bedrooms, bathrooms, sqft, 
-        description, is_featured, is_active, amenities, highlights, brochure_url, map_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        description, transaction_type, is_featured, is_active, amenities, highlights, brochure_url, map_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title, location.id, typeRow.id, city || 'Hyderabad', parseFloat(price) || 0,
         parseInt(bedrooms) || 0, parseInt(bathrooms) || 0, parseInt(sqft) || 0, description || '',
+        transactionType || 'Sale',
         isFeatured ? 1 : 0, isActive !== false ? 1 : 0,
         JSON.stringify(amenities || []), JSON.stringify(highlights || []),
         brochureUrl || '', mapUrl || ''
@@ -220,7 +245,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const {
       title, type, city, area, price, bedrooms, bathrooms, sqft,
       description, images, isFeatured, isActive, amenities, highlights,
-      brochureUrl, mapUrl
+      brochureUrl, mapUrl, transactionType
     } = req.body;
 
     // Get location_id and type_id
@@ -243,12 +268,13 @@ router.put('/:id', authenticateToken, async (req, res) => {
       `UPDATE properties SET
        title = ?, location_id = ?, type_id = ?, city = ?, price = ?,
        bedrooms = ?, bathrooms = ?, sqft = ?, description = ?,
-       is_featured = ?, is_active = ?, amenities = ?, highlights = ?,
+       transaction_type = ?, is_featured = ?, is_active = ?, amenities = ?, highlights = ?,
        brochure_url = ?, map_url = ?
        WHERE id = ?`,
       [
         title, location.id, typeRow.id, city || 'Hyderabad', price,
         bedrooms || 0, bathrooms || 0, sqft || 0, description || '',
+        transactionType || 'Sale',
         isFeatured ? 1 : 0, isActive ? 1 : 0,
         JSON.stringify(amenities || []), JSON.stringify(highlights || []),
         brochureUrl || '', mapUrl || '', id

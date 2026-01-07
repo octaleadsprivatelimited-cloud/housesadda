@@ -29,15 +29,20 @@ const AdminProperties = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [transactionFilter, setTransactionFilter] = useState<string>('All');
 
   useEffect(() => {
     loadProperties();
-  }, []);
+  }, [transactionFilter]);
 
   const loadProperties = async () => {
     try {
       setIsLoading(true);
-      const data = await propertiesAPI.getAll();
+      const params: any = {};
+      if (transactionFilter !== 'All') {
+        params.transactionType = transactionFilter;
+      }
+      const data = await propertiesAPI.getAll(params);
       setProperties(data);
     } catch (error: any) {
       toast({
@@ -105,6 +110,7 @@ const AdminProperties = () => {
     }
   };
 
+  // Properties are already filtered by transactionType from API, so we only filter by search and type
   const filteredProperties = properties.filter(p => {
     const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          p.area?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -148,6 +154,17 @@ const AdminProperties = () => {
           />
         </div>
         <div className="flex gap-2">
+          <select
+            value={transactionFilter}
+            onChange={(e) => setTransactionFilter(e.target.value)}
+            className="px-4 py-2 rounded-xl border border-border bg-card text-sm"
+          >
+            <option value="All">All Transactions</option>
+            <option value="Sale">Sale</option>
+            <option value="Rent">Rent</option>
+            <option value="Lease">Lease</option>
+            <option value="PG">PG</option>
+          </select>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}

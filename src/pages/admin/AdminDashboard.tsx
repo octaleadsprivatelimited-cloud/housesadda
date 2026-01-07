@@ -8,41 +8,56 @@ import {
   Plus,
   ArrowUpRight,
   Phone,
-  Loader2
+  Loader2,
+  Home,
+  Key,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { propertiesAPI } from '@/lib/api';
 
+const transactionTypes = ['All', 'Sale', 'Rent', 'Lease', 'PG'];
+
 const AdminDashboard = () => {
+  const [selectedFilter, setSelectedFilter] = useState('All');
   const [stats, setStats] = useState([
     { label: 'Total Properties', value: '0', icon: Building2, change: 'Loading...', color: 'bg-blue-500' },
     { label: 'Featured', value: '0', icon: Star, change: 'Loading...', color: 'bg-amber-500' },
     { label: 'Active', value: '0', icon: Eye, change: 'Loading...', color: 'bg-green-500' },
-    { label: 'Total Properties', value: '0', icon: Phone, change: 'Loading...', color: 'bg-purple-500' },
+    { label: 'Inactive', value: '0', icon: Phone, change: 'Loading...', color: 'bg-purple-500' },
   ]);
   const [recentProperties, setRecentProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [selectedFilter]);
 
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
-      const allProperties = await propertiesAPI.getAll();
-      const activeProperties = allProperties.filter((p: any) => p.isActive);
-      const featuredProperties = allProperties.filter((p: any) => p.isFeatured);
+      const params: any = {};
+      if (selectedFilter !== 'All') {
+        params.transactionType = selectedFilter;
+      }
+      
+      const allProperties = await propertiesAPI.getAll(params);
+      
+      // The API already filters by transactionType, so we can use allProperties directly
+      const filteredProperties = allProperties;
+      
+      const activeProperties = filteredProperties.filter((p: any) => p.isActive);
+      const featuredProperties = filteredProperties.filter((p: any) => p.isFeatured);
 
       setStats([
-        { label: 'Total Properties', value: String(allProperties.length), icon: Building2, change: 'All properties', color: 'bg-blue-500' },
-        { label: 'Featured', value: String(featuredProperties.length), icon: Star, change: `${Math.round((featuredProperties.length / allProperties.length) * 100) || 0}% of total`, color: 'bg-amber-500' },
+        { label: 'Total Properties', value: String(filteredProperties.length), icon: Building2, change: selectedFilter === 'All' ? 'All properties' : `${selectedFilter} only`, color: 'bg-blue-500' },
+        { label: 'Featured', value: String(featuredProperties.length), icon: Star, change: `${Math.round((featuredProperties.length / filteredProperties.length) * 100) || 0}% of total`, color: 'bg-amber-500' },
         { label: 'Active', value: String(activeProperties.length), icon: Eye, change: 'Currently active', color: 'bg-green-500' },
-        { label: 'Inactive', value: String(allProperties.length - activeProperties.length), icon: Phone, change: 'Not visible', color: 'bg-purple-500' },
+        { label: 'Inactive', value: String(filteredProperties.length - activeProperties.length), icon: Phone, change: 'Not visible', color: 'bg-purple-500' },
       ]);
 
-      // Get recent properties (last 4)
-      const recent = allProperties
+      // Get recent properties (last 4) based on filter
+      const recent = filteredProperties
         .sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
         .slice(0, 4)
         .map((p: any) => ({
@@ -50,7 +65,8 @@ const AdminDashboard = () => {
           title: p.title,
           area: p.area || '',
           price: formatPrice(p.price),
-          status: p.isActive ? 'Active' : 'Inactive'
+          status: p.isActive ? 'Active' : 'Inactive',
+          transactionType: p.transactionType || 'Sale'
         }));
       
       setRecentProperties(recent);
@@ -97,6 +113,27 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* Filter Tabs */}
+      <div className="bg-card rounded-2xl p-4 card-shadow">
+        <div className="flex flex-wrap gap-2">
+          {transactionTypes.map((type) => (
+            <Button
+              key={type}
+              variant={selectedFilter === type ? "default" : "outline"}
+              onClick={() => setSelectedFilter(type)}
+              className={selectedFilter === type ? "accent-gradient text-accent-foreground" : ""}
+            >
+              {type === 'All' && <Building2 className="h-4 w-4 mr-2" />}
+              {type === 'Sale' && <Home className="h-4 w-4 mr-2" />}
+              {type === 'Rent' && <Key className="h-4 w-4 mr-2" />}
+              {type === 'Lease' && <FileText className="h-4 w-4 mr-2" />}
+              {type === 'PG' && <Building2 className="h-4 w-4 mr-2" />}
+              {type}
+            </Button>
+          ))}
+        </div>
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
@@ -123,24 +160,35 @@ const AdminDashboard = () => {
           </Link>
         </div>
         <div className="space-y-3">
-          {recentProperties.map((property) => (
-            <div key={property.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors">
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{property.title}</p>
-                <p className="text-sm text-muted-foreground">{property.area}</p>
+          {recentProperties.length > 0 ? (
+            recentProperties.map((property) => (
+              <div key={property.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{property.title}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-sm text-muted-foreground">{property.area}</p>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                      {property.transactionType || 'Sale'}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-right ml-4">
+                  <p className="font-semibold text-price">{property.price}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    property.status === 'Active' 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {property.status}
+                  </span>
+                </div>
               </div>
-              <div className="text-right ml-4">
-                <p className="font-semibold text-price">{property.price}</p>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  property.status === 'Active' 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
-                  {property.status}
-                </span>
-              </div>
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No properties found for {selectedFilter === 'All' ? 'all types' : selectedFilter}
             </div>
-          ))}
+          )}
         </div>
       </div>
 
