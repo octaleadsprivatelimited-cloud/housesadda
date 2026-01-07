@@ -10,6 +10,15 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
+// Admin Pages
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProperties from "./pages/admin/AdminProperties";
+import PropertyForm from "./pages/admin/PropertyForm";
+import AdminLocations from "./pages/admin/AdminLocations";
+import AdminTypes from "./pages/admin/AdminTypes";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -19,12 +28,25 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Index />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/property/:id" element={<PropertyDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="properties" element={<AdminProperties />} />
+            <Route path="properties/new" element={<PropertyForm />} />
+            <Route path="properties/:id/edit" element={<PropertyForm />} />
+            <Route path="locations" element={<AdminLocations />} />
+            <Route path="types" element={<AdminTypes />} />
+          </Route>
+          
+          {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -1,0 +1,166 @@
+import { Link } from 'react-router-dom';
+import { 
+  Building2, 
+  Eye, 
+  TrendingUp, 
+  Star, 
+  Plus,
+  ArrowUpRight,
+  Phone,
+  MessageCircle
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+const stats = [
+  { label: 'Total Properties', value: '12', icon: Building2, change: '+3 this month', color: 'bg-blue-500' },
+  { label: 'Featured', value: '4', icon: Star, change: '33% of total', color: 'bg-amber-500' },
+  { label: 'Total Views', value: '2.4K', icon: Eye, change: '+18% vs last month', color: 'bg-green-500' },
+  { label: 'Inquiries', value: '48', icon: Phone, change: '+12 this week', color: 'bg-purple-500' },
+];
+
+const recentProperties = [
+  { id: '1', title: 'Luxury 3 BHK in Gachibowli', area: 'Gachibowli', price: '₹1.50 Cr', status: 'Active' },
+  { id: '2', title: 'Premium Villa in Jubilee Hills', area: 'Jubilee Hills', price: '₹8.50 Cr', status: 'Active' },
+  { id: '3', title: 'Modern 2 BHK in Hitech City', area: 'Hitech City', price: '₹95 L', status: 'Active' },
+  { id: '4', title: 'Plot in Shamirpet', area: 'Shamirpet', price: '₹45 L', status: 'Inactive' },
+];
+
+const recentInquiries = [
+  { name: 'Rahul Sharma', property: 'Luxury 3 BHK in Gachibowli', type: 'WhatsApp', time: '2 hours ago' },
+  { name: 'Priya Reddy', property: 'Premium Villa in Jubilee Hills', type: 'Call', time: '5 hours ago' },
+  { name: 'Anil Kumar', property: 'Modern 2 BHK in Hitech City', type: 'WhatsApp', time: 'Yesterday' },
+];
+
+const AdminDashboard = () => {
+  return (
+    <div className="space-y-6">
+      {/* Welcome Banner */}
+      <div className="hero-gradient rounded-2xl p-6 md:p-8 text-primary-foreground">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">Welcome back, Admin! 👋</h1>
+            <p className="text-primary-foreground/80">
+              Here's what's happening with your properties today.
+            </p>
+          </div>
+          <Link to="/admin/properties/new">
+            <Button className="accent-gradient text-accent-foreground font-semibold">
+              <Plus className="h-5 w-5 mr-2" />
+              Add Property
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat) => (
+          <div key={stat.label} className="bg-card rounded-2xl p-5 card-shadow">
+            <div className="flex items-start justify-between mb-3">
+              <div className={`p-3 rounded-xl ${stat.color}`}>
+                <stat.icon className="h-5 w-5 text-white" />
+              </div>
+              <TrendingUp className="h-4 w-4 text-green-500" />
+            </div>
+            <p className="text-2xl md:text-3xl font-bold">{stat.value}</p>
+            <p className="text-sm text-muted-foreground">{stat.label}</p>
+            <p className="text-xs text-green-600 mt-1">{stat.change}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Two Column Layout */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Recent Properties */}
+        <div className="bg-card rounded-2xl p-6 card-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Recent Properties</h3>
+            <Link to="/admin/properties" className="text-sm text-primary hover:underline flex items-center gap-1">
+              View All <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {recentProperties.map((property) => (
+              <div key={property.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{property.title}</p>
+                  <p className="text-sm text-muted-foreground">{property.area}</p>
+                </div>
+                <div className="text-right ml-4">
+                  <p className="font-semibold text-price">{property.price}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    property.status === 'Active' 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {property.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Inquiries */}
+        <div className="bg-card rounded-2xl p-6 card-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Recent Inquiries</h3>
+            <span className="text-sm text-muted-foreground">Last 7 days</span>
+          </div>
+          <div className="space-y-3">
+            {recentInquiries.map((inquiry, index) => (
+              <div key={index} className="flex items-center gap-4 p-3 rounded-xl bg-secondary/50">
+                <div className={`p-2 rounded-lg ${
+                  inquiry.type === 'WhatsApp' ? 'bg-green-100' : 'bg-blue-100'
+                }`}>
+                  {inquiry.type === 'WhatsApp' 
+                    ? <MessageCircle className="h-5 w-5 text-green-600" />
+                    : <Phone className="h-5 w-5 text-blue-600" />
+                  }
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium">{inquiry.name}</p>
+                  <p className="text-sm text-muted-foreground truncate">{inquiry.property}</p>
+                </div>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">{inquiry.time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-card rounded-2xl p-6 card-shadow">
+        <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Link to="/admin/properties/new">
+            <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2">
+              <Plus className="h-6 w-6" />
+              <span>Add Property</span>
+            </Button>
+          </Link>
+          <Link to="/admin/locations">
+            <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2">
+              <Building2 className="h-6 w-6" />
+              <span>Manage Locations</span>
+            </Button>
+          </Link>
+          <a href="/" target="_blank">
+            <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2">
+              <Eye className="h-6 w-6" />
+              <span>View Website</span>
+            </Button>
+          </a>
+          <Link to="/admin/properties">
+            <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2">
+              <Star className="h-6 w-6" />
+              <span>Featured Props</span>
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;
