@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Building2, 
@@ -7,31 +8,82 @@ import {
   Plus,
   ArrowUpRight,
   Phone,
-  MessageCircle
+  MessageCircle,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-const stats = [
-  { label: 'Total Properties', value: '12', icon: Building2, change: '+3 this month', color: 'bg-blue-500' },
-  { label: 'Featured', value: '4', icon: Star, change: '33% of total', color: 'bg-amber-500' },
-  { label: 'Total Views', value: '2.4K', icon: Eye, change: '+18% vs last month', color: 'bg-green-500' },
-  { label: 'Inquiries', value: '48', icon: Phone, change: '+12 this week', color: 'bg-purple-500' },
-];
-
-const recentProperties = [
-  { id: '1', title: 'Luxury 3 BHK in Gachibowli', area: 'Gachibowli', price: '₹1.50 Cr', status: 'Active' },
-  { id: '2', title: 'Premium Villa in Jubilee Hills', area: 'Jubilee Hills', price: '₹8.50 Cr', status: 'Active' },
-  { id: '3', title: 'Modern 2 BHK in Hitech City', area: 'Hitech City', price: '₹95 L', status: 'Active' },
-  { id: '4', title: 'Plot in Shamirpet', area: 'Shamirpet', price: '₹45 L', status: 'Inactive' },
-];
-
-const recentInquiries = [
-  { name: 'Rahul Sharma', property: 'Luxury 3 BHK in Gachibowli', type: 'WhatsApp', time: '2 hours ago' },
-  { name: 'Priya Reddy', property: 'Premium Villa in Jubilee Hills', type: 'Call', time: '5 hours ago' },
-  { name: 'Anil Kumar', property: 'Modern 2 BHK in Hitech City', type: 'WhatsApp', time: 'Yesterday' },
-];
+import { propertiesAPI } from '@/lib/api';
 
 const AdminDashboard = () => {
+  const [stats, setStats] = useState([
+    { label: 'Total Properties', value: '0', icon: Building2, change: 'Loading...', color: 'bg-blue-500' },
+    { label: 'Featured', value: '0', icon: Star, change: 'Loading...', color: 'bg-amber-500' },
+    { label: 'Active', value: '0', icon: Eye, change: 'Loading...', color: 'bg-green-500' },
+    { label: 'Total Properties', value: '0', icon: Phone, change: 'Loading...', color: 'bg-purple-500' },
+  ]);
+  const [recentProperties, setRecentProperties] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      const allProperties = await propertiesAPI.getAll();
+      const activeProperties = allProperties.filter((p: any) => p.isActive);
+      const featuredProperties = allProperties.filter((p: any) => p.isFeatured);
+
+      setStats([
+        { label: 'Total Properties', value: String(allProperties.length), icon: Building2, change: 'All properties', color: 'bg-blue-500' },
+        { label: 'Featured', value: String(featuredProperties.length), icon: Star, change: `${Math.round((featuredProperties.length / allProperties.length) * 100) || 0}% of total`, color: 'bg-amber-500' },
+        { label: 'Active', value: String(activeProperties.length), icon: Eye, change: 'Currently active', color: 'bg-green-500' },
+        { label: 'Inactive', value: String(allProperties.length - activeProperties.length), icon: Phone, change: 'Not visible', color: 'bg-purple-500' },
+      ]);
+
+      // Get recent properties (last 4)
+      const recent = allProperties
+        .sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+        .slice(0, 4)
+        .map((p: any) => ({
+          id: String(p.id),
+          title: p.title,
+          area: p.area || '',
+          price: formatPrice(p.price),
+          status: p.isActive ? 'Active' : 'Inactive'
+        }));
+      
+      setRecentProperties(recent);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatPrice = (price: number) => {
+    if (price >= 10000000) {
+      return `₹${(price / 10000000).toFixed(2)} Cr`;
+    } else if (price >= 100000) {
+      return `₹${(price / 100000).toFixed(2)} L`;
+    }
+    return `₹${price.toLocaleString('en-IN')}`;
+  };
+
+  const recentInquiries = [
+    { name: 'Rahul Sharma', property: 'Luxury 3 BHK in Gachibowli', type: 'WhatsApp', time: '2 hours ago' },
+    { name: 'Priya Reddy', property: 'Premium Villa in Jubilee Hills', type: 'Call', time: '5 hours ago' },
+    { name: 'Anil Kumar', property: 'Modern 2 BHK in Hitech City', type: 'WhatsApp', time: 'Yesterday' },
+  ];
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}

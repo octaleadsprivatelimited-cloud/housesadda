@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { authAPI } from '@/lib/api';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -15,27 +16,18 @@ const AdminLogin = () => {
     password: '',
   });
 
-  // Demo credentials - replace with real auth when connecting to MySQL
-  const DEMO_CREDENTIALS = {
-    username: 'admin',
-    password: 'admin123',
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (
-      credentials.username === DEMO_CREDENTIALS.username &&
-      credentials.password === DEMO_CREDENTIALS.password
-    ) {
-      // Store session in localStorage (replace with real session management)
+    try {
+      const response = await authAPI.login(credentials.username, credentials.password);
+      
+      // Store session in localStorage
       localStorage.setItem('adminSession', JSON.stringify({ 
         isLoggedIn: true, 
-        user: credentials.username,
+        user: response.user,
+        token: response.token,
         loginTime: new Date().toISOString()
       }));
       
@@ -45,10 +37,22 @@ const AdminLogin = () => {
       });
       
       navigate('/admin/dashboard');
-    } else {
+    } catch (error: any) {
+      let errorMessage = "Invalid username or password";
+      
+      if (error.message) {
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          errorMessage = "Cannot connect to server. Make sure the backend is running on port 3001.";
+        } else if (error.message.includes('Invalid credentials')) {
+          errorMessage = "Invalid username or password. Default: admin/admin123";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Login Failed",
-        description: "Invalid username or password. Try admin/admin123",
+        description: errorMessage,
         variant: "destructive",
       });
     }

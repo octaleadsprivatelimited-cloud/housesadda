@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Upload, X, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { propertiesAPI } from '@/lib/api';
 
 const propertyTypes = ['Apartment', 'Villa', 'Plot', 'Commercial'];
 const cities = ['Hyderabad'];
@@ -13,9 +14,12 @@ const areas = ['Gachibowli', 'Hitech City', 'Kondapur', 'Jubilee Hills', 'Banjar
 
 const PropertyForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
+  const isEditMode = !!id;
   
   const [formData, setFormData] = useState({
     title: '',
@@ -38,6 +42,53 @@ const PropertyForm = () => {
 
   const [newAmenity, setNewAmenity] = useState('');
   const [newHighlight, setNewHighlight] = useState('');
+
+  useEffect(() => {
+    if (isEditMode) {
+      loadProperty();
+    }
+  }, [id]);
+
+  const loadProperty = async () => {
+    if (!id) return;
+    
+    try {
+      setIsLoading(true);
+      const property = await propertiesAPI.getById(id);
+      
+      setFormData({
+        title: property.title || '',
+        type: property.type || 'Apartment',
+        city: property.city || 'Hyderabad',
+        area: property.area || '',
+        price: property.price?.toString() || '',
+        priceUnit: 'onwards',
+        bedrooms: property.bedrooms?.toString() || '',
+        bathrooms: property.bathrooms?.toString() || '',
+        sqft: property.sqft?.toString() || '',
+        description: property.description || '',
+        brochureUrl: property.brochureUrl || '',
+        mapUrl: property.mapUrl || '',
+        isFeatured: property.isFeatured || false,
+        isActive: property.isActive !== undefined ? property.isActive : true,
+        amenities: property.amenities || [],
+        highlights: property.highlights || [],
+      });
+      
+      if (property.images && property.images.length > 0) {
+        setImages(property.images);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load property",
+        variant: "destructive",
+      });
+      navigate('/admin/properties');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -102,16 +153,59 @@ const PropertyForm = () => {
       return;
     }
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      const propertyData = {
+        title: formData.title,
+        type: formData.type,
+        city: formData.city,
+        area: formData.area,
+        price: parseFloat(formData.price),
+        bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : 0,
+        bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : 0,
+        sqft: formData.sqft ? parseInt(formData.sqft) : 0,
+        description: formData.description,
+        images: images,
+        isFeatured: formData.isFeatured,
+        isActive: formData.isActive,
+        amenities: formData.amenities,
+        highlights: formData.highlights,
+        brochureUrl: formData.brochureUrl,
+        mapUrl: formData.mapUrl,
+      };
 
-    toast({
-      title: "Property Added!",
-      description: "Your property has been successfully added.",
-    });
+      if (isEditMode && id) {
+        await propertiesAPI.update(id, propertyData);
+        toast({
+          title: "Property Updated!",
+          description: "Your property has been successfully updated.",
+        });
+      } else {
+        await propertiesAPI.create(propertyData);
+        toast({
+          title: "Property Added!",
+          description: "Your property has been successfully added.",
+        });
+      }
 
-    navigate('/admin/properties');
+      navigate('/admin/properties');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save property",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto flex items-center justify-center h-64">
+        <p className="text-muted-foreground">Loading property...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -121,7 +215,7 @@ const PropertyForm = () => {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold">Add New Property</h1>
+          <h1 className="text-2xl font-bold">{isEditMode ? 'Edit Property' : 'Add New Property'}</h1>
           <p className="text-muted-foreground">Fill in the details below</p>
         </div>
       </div>
@@ -442,7 +536,7 @@ const PropertyForm = () => {
             className="accent-gradient text-accent-foreground font-semibold px-8"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Saving...' : 'Add Property'}
+            {isSubmitting ? 'Saving...' : isEditMode ? 'Update Property' : 'Add Property'}
           </Button>
         </div>
       </form>

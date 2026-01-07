@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { MobileActionBar } from '@/components/MobileActionBar';
 import { Button } from '@/components/ui/button';
+import { propertiesAPI } from '@/lib/api';
+import { Loader2 } from 'lucide-react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -24,66 +26,91 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
-// Sample property data (would come from API in real app)
-const propertyData = {
-  id: '1',
-  title: 'Luxury 3 BHK Apartment in Gachibowli',
-  type: 'Apartment',
-  city: 'Hyderabad',
-  area: 'Gachibowli',
-  price: 15000000,
-  priceUnit: 'onwards',
-  bedrooms: 3,
-  bathrooms: 3,
-  sqft: 2100,
-  isFeatured: true,
-  brochureUrl: 'https://drive.google.com/file/d/example1',
-  images: [
-    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&h=800&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=1200&h=800&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?w=1200&h=800&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1600607687644-aac4c3eac7f4?w=1200&h=800&fit=crop&q=80',
-  ],
-  description: `Experience luxury living at its finest in this stunning 3 BHK apartment located in the heart of Gachibowli. This premium property offers modern amenities, spacious interiors, and breathtaking views.
-
-The apartment features a well-designed layout with premium flooring, modular kitchen, and contemporary fixtures throughout. Large windows ensure ample natural light and ventilation.
-
-Located in one of Hyderabad's most sought-after IT corridors, this property offers excellent connectivity to major tech parks, schools, hospitals, and shopping centers.`,
-  amenities: [
-    '24/7 Security',
-    'Swimming Pool',
-    'Gymnasium',
-    'Clubhouse',
-    'Children\'s Play Area',
-    'Landscaped Gardens',
-    'Power Backup',
-    'Covered Parking',
-    'Intercom Facility',
-    'Rainwater Harvesting',
-    'CCTV Surveillance',
-    'Jogging Track',
-  ],
-  highlights: [
-    'Ready to Move',
-    'East Facing',
-    'Vastu Compliant',
-    'Near IT Parks',
-    'Metro Connectivity',
-    'HMDA Approved',
-  ],
-  mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30452.68657654982!2d78.34!3d17.44!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb93dc8c5d69df%3A0x19688beb557fa0ee!2sGachibowli%2C%20Hyderabad%2C%20Telangana!5e0!3m2!1sen!2sin!4v1704067200000!5m2!1sen!2sin',
-  postedDate: '2024-01-05',
-};
-
 const PropertyDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const [property, setProperty] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentImage, setCurrentImage] = useState(0);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     description: true,
     amenities: true,
     location: true,
   });
+
+  useEffect(() => {
+    if (id) {
+      loadProperty();
+    }
+  }, [id]);
+
+  const loadProperty = async () => {
+    try {
+      setIsLoading(true);
+      const data = await propertiesAPI.getById(id!);
+      setProperty(data);
+      if (data.images && data.images.length > 0) {
+        setCurrentImage(0);
+      }
+    } catch (error) {
+      console.error('Error loading property:', error);
+      navigate('/properties');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!property) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-2">Property not found</h2>
+            <Link to="/properties">
+              <Button>Back to Properties</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const propertyData = {
+    id: property.id,
+    title: property.title,
+    type: property.type,
+    city: property.city || 'Hyderabad',
+    area: property.area,
+    price: property.price,
+    priceUnit: 'onwards',
+    bedrooms: property.bedrooms,
+    bathrooms: property.bathrooms,
+    sqft: property.sqft,
+    isFeatured: property.isFeatured,
+    brochureUrl: property.brochureUrl,
+    images: property.images && property.images.length > 0 
+      ? property.images 
+      : property.image 
+        ? [property.image] 
+        : ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&h=800&fit=crop&q=80'],
+    description: property.description || 'No description available.',
+    amenities: property.amenities || [],
+    highlights: property.highlights || [],
+    mapUrl: property.mapUrl || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30452.68657654982!2d78.34!3d17.44!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb93dc8c5d69df%3A0x19688beb557fa0ee!2sGachibowli%2C%20Hyderabad%2C%20Telangana!5e0!3m2!1sen!2sin!4v1704067200000!5m2!1sen!2sin',
+    postedDate: property.createdAt || new Date().toISOString().split('T')[0],
+  };
 
   const formatPrice = (price: number) => {
     if (price >= 10000000) {
@@ -99,11 +126,15 @@ const PropertyDetail = () => {
   };
 
   const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % propertyData.images.length);
+    if (propertyData.images.length > 0) {
+      setCurrentImage((prev) => (prev + 1) % propertyData.images.length);
+    }
   };
 
   const prevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + propertyData.images.length) % propertyData.images.length);
+    if (propertyData.images.length > 0) {
+      setCurrentImage((prev) => (prev - 1 + propertyData.images.length) % propertyData.images.length);
+    }
   };
 
   const whatsappMessage = `Hi Houses Adda, I'm interested in this property: ${propertyData.title} in ${propertyData.area}, ${propertyData.city}. Price: ${formatPrice(propertyData.price)}`;

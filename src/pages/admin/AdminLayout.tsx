@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
+import { useNavigate, Link, Outlet, useLocation, Routes, Route } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Building2, 
@@ -32,7 +32,7 @@ const AdminLayout = () => {
     const session = localStorage.getItem('adminSession');
     if (session) {
       const parsed = JSON.parse(session);
-      if (parsed.isLoggedIn) {
+      if (parsed.isLoggedIn && parsed.token) {
         setIsAuthenticated(true);
       } else {
         navigate('/admin');

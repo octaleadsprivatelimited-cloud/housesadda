@@ -1,85 +1,50 @@
-import { useRef } from 'react';
-import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { useRef, useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight, ArrowRight, Loader2 } from 'lucide-react';
 import { PropertyCard, Property } from './PropertyCard';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-
-const featuredProperties: Property[] = [
-  {
-    id: '1',
-    title: 'Luxury 3 BHK Apartment in Gachibowli',
-    type: 'Flat',
-    city: 'Hyderabad',
-    area: 'Gachibowli',
-    price: 15000000,
-    priceUnit: 'onwards',
-    bedrooms: 3,
-    bathrooms: 3,
-    sqft: 2100,
-    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop&q=80',
-    imageCount: 12,
-    isFeatured: true,
-    isVerified: true,
-  },
-  {
-    id: '2',
-    title: 'Premium Villa in Jubilee Hills',
-    type: 'Villa',
-    city: 'Hyderabad',
-    area: 'Jubilee Hills',
-    price: 85000000,
-    priceUnit: 'negotiable',
-    bedrooms: 5,
-    bathrooms: 6,
-    sqft: 5500,
-    image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&h=600&fit=crop&q=80',
-    imageCount: 18,
-    isVerified: true,
-  },
-  {
-    id: '3',
-    title: 'Modern 2 BHK in Hitech City',
-    type: 'Flat',
-    city: 'Hyderabad',
-    area: 'Hitech City',
-    price: 9500000,
-    priceUnit: 'all inclusive',
-    bedrooms: 2,
-    bathrooms: 2,
-    sqft: 1350,
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop&q=80',
-    imageCount: 8,
-    isVerified: true,
-  },
-  {
-    id: '4',
-    title: 'HMDA Approved Plot in Shamirpet',
-    type: 'Plot',
-    city: 'Hyderabad',
-    area: 'Shamirpet',
-    price: 4500000,
-    priceUnit: 'per acre',
-    sqft: 200,
-    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop&q=80',
-    imageCount: 5,
-  },
-  {
-    id: '5',
-    title: 'Commercial Space in Madhapur',
-    type: 'Commercial',
-    city: 'Hyderabad',
-    area: 'Madhapur',
-    price: 25000000,
-    priceUnit: 'onwards',
-    sqft: 3000,
-    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop&q=80',
-    imageCount: 10,
-    isVerified: true,
-  },
-];
+import { propertiesAPI } from '@/lib/api';
 
 export function FeaturedProperties() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadFeaturedProperties();
+  }, []);
+
+  const loadFeaturedProperties = async () => {
+    try {
+      setIsLoading(true);
+      const data = await propertiesAPI.getAll({ featured: true, active: true });
+      
+      const transformed: Property[] = data.slice(0, 5).map((prop: any) => ({
+        id: String(prop.id),
+        title: prop.title,
+        type: prop.type || 'Apartment',
+        city: prop.city || 'Hyderabad',
+        area: prop.area || '',
+        price: prop.price,
+        priceUnit: 'onwards',
+        bedrooms: prop.bedrooms,
+        bathrooms: prop.bathrooms,
+        sqft: prop.sqft,
+        image: prop.image || prop.images?.[0] || '',
+        imageCount: prop.images?.length || 0,
+        isFeatured: true,
+        isVerified: true,
+        brochureUrl: prop.brochureUrl,
+      }));
+      
+      setFeaturedProperties(transformed);
+    } catch (error) {
+      console.error('Error loading featured properties:', error);
+      setFeaturedProperties([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -110,16 +75,26 @@ export function FeaturedProperties() {
           </div>
         </div>
 
-        <div
-          ref={scrollRef}
-          className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 md:mx-0 md:px-0"
-        >
-          {featuredProperties.map((property) => (
-            <div key={property.id} className="flex-shrink-0 w-[280px] md:w-[300px]">
-              <PropertyCard property={property} />
-            </div>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : featuredProperties.length > 0 ? (
+          <div
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 md:mx-0 md:px-0"
+          >
+            {featuredProperties.map((property) => (
+              <div key={property.id} className="flex-shrink-0 w-[280px] md:w-[300px]">
+                <PropertyCard property={property} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-muted-foreground">
+            No featured properties available
+          </div>
+        )}
       </div>
     </section>
   );

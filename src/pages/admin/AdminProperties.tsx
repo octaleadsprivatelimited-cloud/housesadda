@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Plus, 
@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { propertiesAPI } from '@/lib/api';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,71 +23,32 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-// Sample data - replace with API calls when connected to MySQL
-const initialProperties = [
-  {
-    id: '1',
-    title: 'Luxury 3 BHK Apartment in Gachibowli',
-    type: 'Apartment',
-    area: 'Gachibowli',
-    city: 'Hyderabad',
-    price: 15000000,
-    bedrooms: 3,
-    sqft: 2100,
-    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=300&fit=crop&q=80',
-    isFeatured: true,
-    isActive: true,
-    createdAt: '2024-01-05',
-  },
-  {
-    id: '2',
-    title: 'Premium Villa in Jubilee Hills',
-    type: 'Villa',
-    area: 'Jubilee Hills',
-    city: 'Hyderabad',
-    price: 85000000,
-    bedrooms: 5,
-    sqft: 5500,
-    image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop&q=80',
-    isFeatured: true,
-    isActive: true,
-    createdAt: '2024-01-04',
-  },
-  {
-    id: '3',
-    title: 'Modern 2 BHK in Hitech City',
-    type: 'Apartment',
-    area: 'Hitech City',
-    city: 'Hyderabad',
-    price: 9500000,
-    bedrooms: 2,
-    sqft: 1350,
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop&q=80',
-    isFeatured: true,
-    isActive: true,
-    createdAt: '2024-01-03',
-  },
-  {
-    id: '4',
-    title: 'HMDA Approved Plot in Shamirpet',
-    type: 'Plot',
-    area: 'Shamirpet',
-    city: 'Hyderabad',
-    price: 4500000,
-    bedrooms: 0,
-    sqft: 200,
-    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=300&fit=crop&q=80',
-    isFeatured: false,
-    isActive: false,
-    createdAt: '2024-01-02',
-  },
-];
-
 const AdminProperties = () => {
   const { toast } = useToast();
-  const [properties, setProperties] = useState(initialProperties);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
+
+  useEffect(() => {
+    loadProperties();
+  }, []);
+
+  const loadProperties = async () => {
+    try {
+      setIsLoading(true);
+      const data = await propertiesAPI.getAll();
+      setProperties(data);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load properties",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const formatPrice = (price: number) => {
     if (price >= 10000000) {
@@ -97,33 +59,66 @@ const AdminProperties = () => {
     return `₹${price.toLocaleString('en-IN')}`;
   };
 
-  const toggleFeatured = (id: string) => {
-    setProperties(prev => prev.map(p => 
-      p.id === id ? { ...p, isFeatured: !p.isFeatured } : p
-    ));
-    toast({ title: "Property updated", description: "Featured status changed successfully." });
+  const toggleFeatured = async (id: string, currentValue: boolean) => {
+    try {
+      await propertiesAPI.toggleFeatured(id, !currentValue);
+      await loadProperties();
+      toast({ title: "Property updated", description: "Featured status changed successfully." });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update property",
+        variant: "destructive",
+      });
+    }
   };
 
-  const toggleActive = (id: string) => {
-    setProperties(prev => prev.map(p => 
-      p.id === id ? { ...p, isActive: !p.isActive } : p
-    ));
-    toast({ title: "Property updated", description: "Active status changed successfully." });
+  const toggleActive = async (id: string, currentValue: boolean) => {
+    try {
+      await propertiesAPI.toggleActive(id, !currentValue);
+      await loadProperties();
+      toast({ title: "Property updated", description: "Active status changed successfully." });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update property",
+        variant: "destructive",
+      });
+    }
   };
 
-  const deleteProperty = (id: string) => {
-    if (confirm('Are you sure you want to delete this property?')) {
-      setProperties(prev => prev.filter(p => p.id !== id));
+  const deleteProperty = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this property?')) {
+      return;
+    }
+
+    try {
+      await propertiesAPI.delete(id);
+      await loadProperties();
       toast({ title: "Property deleted", description: "Property removed successfully.", variant: "destructive" });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete property",
+        variant: "destructive",
+      });
     }
   };
 
   const filteredProperties = properties.filter(p => {
     const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         p.area.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filterType === 'all' || p.type.toLowerCase() === filterType;
+                         p.area?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = filterType === 'all' || p.type?.toLowerCase() === filterType.toLowerCase();
     return matchesSearch && matchesType;
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">Loading properties...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -189,12 +184,18 @@ const AdminProperties = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-16 h-12 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
-                        <img src={property.image} alt="" className="w-full h-full object-cover" />
+                        {property.image ? (
+                          <img src={property.image} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
                       </div>
                       <div className="min-w-0">
                         <p className="font-medium truncate max-w-[200px]">{property.title}</p>
                         <p className="text-sm text-muted-foreground">
-                          {property.bedrooms > 0 ? `${property.bedrooms} BHK • ` : ''}{property.sqft} sqft
+                          {property.bedrooms > 0 ? `${property.bedrooms} BHK • ` : ''}{property.sqft || 0} sqft
                         </p>
                       </div>
                     </div>
@@ -206,7 +207,7 @@ const AdminProperties = () => {
                   <td className="px-6 py-4 font-semibold text-price">{formatPrice(property.price)}</td>
                   <td className="px-6 py-4 text-center">
                     <button 
-                      onClick={() => toggleFeatured(property.id)}
+                      onClick={() => toggleFeatured(String(property.id), property.isFeatured)}
                       className={`p-1.5 rounded-lg transition-colors ${
                         property.isFeatured ? 'text-amber-500 bg-amber-50' : 'text-muted-foreground hover:bg-secondary'
                       }`}
@@ -217,7 +218,7 @@ const AdminProperties = () => {
                   <td className="px-6 py-4 text-center">
                     <Switch
                       checked={property.isActive}
-                      onCheckedChange={() => toggleActive(property.id)}
+                      onCheckedChange={() => toggleActive(String(property.id), property.isActive)}
                     />
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -239,7 +240,7 @@ const AdminProperties = () => {
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          onClick={() => deleteProperty(property.id)}
+                          onClick={() => deleteProperty(String(property.id))}
                           className="text-destructive"
                         >
                           <Trash2 className="h-4 w-4 mr-2" /> Delete
@@ -259,7 +260,13 @@ const AdminProperties = () => {
             <div key={property.id} className="p-4 space-y-3">
               <div className="flex gap-3">
                 <div className="w-20 h-16 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
-                  <img src={property.image} alt="" className="w-full h-full object-cover" />
+                  {property.image ? (
+                    <img src={property.image} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium line-clamp-2">{property.title}</p>
@@ -270,14 +277,14 @@ const AdminProperties = () => {
                 <span className="font-semibold text-price">{formatPrice(property.price)}</span>
                 <div className="flex items-center gap-3">
                   <button 
-                    onClick={() => toggleFeatured(property.id)}
+                    onClick={() => toggleFeatured(String(property.id), property.isFeatured)}
                     className={property.isFeatured ? 'text-amber-500' : 'text-muted-foreground'}
                   >
                     <Star className={`h-5 w-5 ${property.isFeatured ? 'fill-current' : ''}`} />
                   </button>
                   <Switch
                     checked={property.isActive}
-                    onCheckedChange={() => toggleActive(property.id)}
+                    onCheckedChange={() => toggleActive(String(property.id), property.isActive)}
                   />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -292,7 +299,7 @@ const AdminProperties = () => {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        onClick={() => deleteProperty(property.id)}
+                        onClick={() => deleteProperty(String(property.id))}
                         className="text-destructive"
                       >
                         <Trash2 className="h-4 w-4 mr-2" /> Delete

@@ -1,80 +1,129 @@
-import { useState } from 'react';
-import { Plus, Edit2, Trash2, MapPin } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, MapPin, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-
-const initialCities = [
-  { id: '1', name: 'Hyderabad', propertiesCount: 12 },
-];
-
-const initialAreas = [
-  { id: '1', name: 'Gachibowli', cityId: '1', propertiesCount: 3 },
-  { id: '2', name: 'Hitech City', cityId: '1', propertiesCount: 2 },
-  { id: '3', name: 'Kondapur', cityId: '1', propertiesCount: 2 },
-  { id: '4', name: 'Jubilee Hills', cityId: '1', propertiesCount: 1 },
-  { id: '5', name: 'Banjara Hills', cityId: '1', propertiesCount: 1 },
-  { id: '6', name: 'Madhapur', cityId: '1', propertiesCount: 1 },
-  { id: '7', name: 'Kukatpally', cityId: '1', propertiesCount: 1 },
-  { id: '8', name: 'Miyapur', cityId: '1', propertiesCount: 1 },
-];
+import { locationsAPI, propertiesAPI } from '@/lib/api';
 
 const AdminLocations = () => {
   const { toast } = useToast();
-  const [cities, setCities] = useState(initialCities);
-  const [areas, setAreas] = useState(initialAreas);
-  const [newCity, setNewCity] = useState('');
-  const [newArea, setNewArea] = useState('');
-  const [selectedCity, setSelectedCity] = useState('1');
-  const [editingCity, setEditingCity] = useState<string | null>(null);
-  const [editingArea, setEditingArea] = useState<string | null>(null);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [newLocation, setNewLocation] = useState({ name: '', city: 'Hyderabad' });
+  const [editingLocation, setEditingLocation] = useState<number | null>(null);
+  const [editData, setEditData] = useState({ name: '', city: '' });
 
-  const addCity = () => {
-    if (newCity.trim()) {
-      const id = Date.now().toString();
-      setCities(prev => [...prev, { id, name: newCity.trim(), propertiesCount: 0 }]);
-      setNewCity('');
-      toast({ title: "City Added", description: `${newCity} has been added successfully.` });
+  useEffect(() => {
+    loadLocations();
+  }, []);
+
+  const loadLocations = async () => {
+    try {
+      setIsLoading(true);
+      const data = await locationsAPI.getAll();
+      setLocations(data);
+    } catch (error) {
+      console.error('Error loading locations:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load locations",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const addArea = () => {
-    if (newArea.trim() && selectedCity) {
-      const id = Date.now().toString();
-      setAreas(prev => [...prev, { id, name: newArea.trim(), cityId: selectedCity, propertiesCount: 0 }]);
-      setNewArea('');
-      toast({ title: "Area Added", description: `${newArea} has been added successfully.` });
+  const getLocationPropertyCount = async (locationId: number) => {
+    try {
+      const props = await propertiesAPI.getAll({ active: true });
+      return props.filter((p: any) => p.area === locations.find(l => l.id === locationId)?.name).length;
+    } catch {
+      return 0;
     }
   };
 
-  const deleteCity = (id: string) => {
-    if (confirm('Delete this city? This will also remove all associated areas.')) {
-      setCities(prev => prev.filter(c => c.id !== id));
-      setAreas(prev => prev.filter(a => a.cityId !== id));
-      toast({ title: "City Deleted", variant: "destructive" });
+  const addLocation = async () => {
+    if (!newLocation.name.trim() || !newLocation.city.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter both name and city",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await locationsAPI.create(newLocation);
+      toast({ title: "Location Added", description: `${newLocation.name} has been added successfully.` });
+      setNewLocation({ name: '', city: 'Hyderabad' });
+      await loadLocations();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add location",
+        variant: "destructive",
+      });
     }
   };
 
-  const deleteArea = (id: string) => {
-    if (confirm('Delete this area?')) {
-      setAreas(prev => prev.filter(a => a.id !== id));
-      toast({ title: "Area Deleted", variant: "destructive" });
+  const deleteLocation = async (id: number) => {
+    if (!confirm('Delete this location?')) return;
+
+    try {
+      await locationsAPI.delete(id);
+      toast({ title: "Location Deleted", variant: "destructive" });
+      await loadLocations();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete location",
+        variant: "destructive",
+      });
     }
   };
 
-  const updateCity = (id: string, name: string) => {
-    setCities(prev => prev.map(c => c.id === id ? { ...c, name } : c));
-    setEditingCity(null);
-    toast({ title: "City Updated" });
+  const startEdit = (location: any) => {
+    setEditingLocation(location.id);
+    setEditData({ name: location.name, city: location.city });
   };
 
-  const updateArea = (id: string, name: string) => {
-    setAreas(prev => prev.map(a => a.id === id ? { ...a, name } : a));
-    setEditingArea(null);
-    toast({ title: "Area Updated" });
+  const saveEdit = async () => {
+    if (!editingLocation || !editData.name.trim()) return;
+
+    try {
+      await locationsAPI.update(editingLocation, editData);
+      toast({ title: "Location Updated" });
+      setEditingLocation(null);
+      await loadLocations();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update location",
+        variant: "destructive",
+      });
+    }
   };
 
-  const filteredAreas = areas.filter(a => a.cityId === selectedCity);
+  const cancelEdit = () => {
+    setEditingLocation(null);
+    setEditData({ name: '', city: '' });
+  };
+
+  // Group locations by city
+  const cities = Array.from(new Set(locations.map(l => l.city))).sort();
+  const locationsByCity = cities.reduce((acc, city) => {
+    acc[city] = locations.filter(l => l.city === city);
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -83,141 +132,88 @@ const AdminLocations = () => {
         <p className="text-muted-foreground">Add and manage cities and areas</p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Cities */}
-        <div className="bg-card rounded-2xl p-6 card-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-primary" />
-              Cities
-            </h2>
-          </div>
-
-          {/* Add City */}
-          <div className="flex gap-2 mb-4">
-            <Input
-              value={newCity}
-              onChange={(e) => setNewCity(e.target.value)}
-              placeholder="Add new city..."
-              className="rounded-xl"
-              onKeyPress={(e) => e.key === 'Enter' && addCity()}
-            />
-            <Button onClick={addCity} className="accent-gradient">
-              <Plus className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {/* Cities List */}
-          <div className="space-y-2">
-            {cities.map((city) => (
-              <div
-                key={city.id}
-                className={`flex items-center justify-between p-3 rounded-xl transition-colors cursor-pointer ${
-                  selectedCity === city.id ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary'
-                }`}
-                onClick={() => setSelectedCity(city.id)}
-              >
-                {editingCity === city.id ? (
-                  <Input
-                    defaultValue={city.name}
-                    onBlur={(e) => updateCity(city.id, e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && updateCity(city.id, (e.target as HTMLInputElement).value)}
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex-1 mr-2"
-                    autoFocus
-                  />
-                ) : (
-                  <div className="flex-1">
-                    <p className="font-medium">{city.name}</p>
-                    <p className={`text-sm ${selectedCity === city.id ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                      {city.propertiesCount} properties
-                    </p>
-                  </div>
-                )}
-                <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setEditingCity(city.id)}
-                    className={selectedCity === city.id ? 'hover:bg-primary-foreground/10' : ''}
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteCity(city.id)}
-                    className={selectedCity === city.id ? 'hover:bg-primary-foreground/10 text-destructive' : 'text-destructive'}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Add New Location */}
+      <div className="bg-card rounded-2xl p-6 card-shadow">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <MapPin className="h-5 w-5 text-primary" />
+          Add New Location
+        </h2>
+        <div className="grid sm:grid-cols-3 gap-3">
+          <Input
+            value={newLocation.name}
+            onChange={(e) => setNewLocation(prev => ({ ...prev, name: e.target.value }))}
+            placeholder="Area/Locality name"
+            className="rounded-xl"
+            onKeyPress={(e) => e.key === 'Enter' && addLocation()}
+          />
+          <Input
+            value={newLocation.city}
+            onChange={(e) => setNewLocation(prev => ({ ...prev, city: e.target.value }))}
+            placeholder="City"
+            className="rounded-xl"
+            onKeyPress={(e) => e.key === 'Enter' && addLocation()}
+          />
+          <Button onClick={addLocation} className="accent-gradient">
+            <Plus className="h-5 w-5 mr-2" />
+            Add Location
+          </Button>
         </div>
+      </div>
 
-        {/* Areas */}
-        <div className="bg-card rounded-2xl p-6 card-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">
-              Areas in {cities.find(c => c.id === selectedCity)?.name || 'City'}
-            </h2>
-          </div>
-
-          {/* Add Area */}
-          <div className="flex gap-2 mb-4">
-            <Input
-              value={newArea}
-              onChange={(e) => setNewArea(e.target.value)}
-              placeholder="Add new area..."
-              className="rounded-xl"
-              onKeyPress={(e) => e.key === 'Enter' && addArea()}
-            />
-            <Button onClick={addArea} className="accent-gradient">
-              <Plus className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {/* Areas List */}
-          <div className="space-y-2 max-h-[400px] overflow-y-auto">
-            {filteredAreas.length > 0 ? (
-              filteredAreas.map((area) => (
+      {/* Locations by City */}
+      <div className="space-y-6">
+        {cities.map((city) => (
+          <div key={city} className="bg-card rounded-2xl p-6 card-shadow">
+            <h2 className="text-lg font-semibold mb-4">{city}</h2>
+            <div className="space-y-2">
+              {locationsByCity[city].map((location) => (
                 <div
-                  key={area.id}
+                  key={location.id}
                   className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors"
                 >
-                  {editingArea === area.id ? (
-                    <Input
-                      defaultValue={area.name}
-                      onBlur={(e) => updateArea(area.id, e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && updateArea(area.id, (e.target as HTMLInputElement).value)}
-                      className="flex-1 mr-2"
-                      autoFocus
-                    />
-                  ) : (
-                    <div className="flex-1">
-                      <p className="font-medium">{area.name}</p>
-                      <p className="text-sm text-muted-foreground">{area.propertiesCount} properties</p>
+                  {editingLocation === location.id ? (
+                    <div className="flex-1 flex gap-2">
+                      <Input
+                        value={editData.name}
+                        onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
+                        className="flex-1"
+                        autoFocus
+                      />
+                      <Input
+                        value={editData.city}
+                        onChange={(e) => setEditData(prev => ({ ...prev, city: e.target.value }))}
+                        className="flex-1"
+                      />
+                      <Button size="sm" onClick={saveEdit}>Save</Button>
+                      <Button size="sm" variant="outline" onClick={cancelEdit}>Cancel</Button>
                     </div>
+                  ) : (
+                    <>
+                      <div className="flex-1">
+                        <p className="font-medium">{location.name}</p>
+                        <p className="text-sm text-muted-foreground">{location.city}</p>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => startEdit(location)}>
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteLocation(location.id)} className="text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </>
                   )}
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => setEditingArea(area.id)}>
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteArea(area.id)} className="text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
                 </div>
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                No areas added yet. Add your first area above.
-              </p>
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        ))}
+        
+        {locations.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            No locations added yet. Add your first location above.
+          </div>
+        )}
       </div>
     </div>
   );

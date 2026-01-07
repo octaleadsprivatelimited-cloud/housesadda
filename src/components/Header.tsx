@@ -75,12 +75,6 @@ export function Header() {
                 Login
               </Link>
 
-              <Link to="/contact">
-                <Button size="sm" variant="outline" className="hidden md:flex border-white text-white hover:bg-white hover:text-primary">
-                  Post Property <span className="ml-1 text-xs bg-white/20 px-1.5 py-0.5 rounded">FREE</span>
-                </Button>
-              </Link>
-
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
