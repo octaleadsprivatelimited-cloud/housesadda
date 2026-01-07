@@ -8,7 +8,6 @@ import {
   Plus,
   ArrowUpRight,
   Phone,
-  MessageCircle,
   Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -70,12 +69,6 @@ const AdminDashboard = () => {
     }
     return `₹${price.toLocaleString('en-IN')}`;
   };
-
-  const recentInquiries = [
-    { name: 'Rahul Sharma', property: 'Luxury 3 BHK in Gachibowli', type: 'WhatsApp', time: '2 hours ago' },
-    { name: 'Priya Reddy', property: 'Premium Villa in Jubilee Hills', type: 'Call', time: '5 hours ago' },
-    { name: 'Anil Kumar', property: 'Modern 2 BHK in Hitech City', type: 'WhatsApp', time: 'Yesterday' },
-  ];
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -121,63 +114,33 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Recent Properties */}
-        <div className="bg-card rounded-2xl p-6 card-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Recent Properties</h3>
-            <Link to="/admin/properties" className="text-sm text-primary hover:underline flex items-center gap-1">
-              View All <ArrowUpRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="space-y-3">
-            {recentProperties.map((property) => (
-              <div key={property.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors">
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{property.title}</p>
-                  <p className="text-sm text-muted-foreground">{property.area}</p>
-                </div>
-                <div className="text-right ml-4">
-                  <p className="font-semibold text-price">{property.price}</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    property.status === 'Active' 
-                      ? 'bg-green-100 text-green-700' 
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {property.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Recent Properties */}
+      <div className="bg-card rounded-2xl p-6 card-shadow">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Recent Properties</h3>
+          <Link to="/admin/properties" className="text-sm text-primary hover:underline flex items-center gap-1">
+            View All <ArrowUpRight className="h-4 w-4" />
+          </Link>
         </div>
-
-        {/* Recent Inquiries */}
-        <div className="bg-card rounded-2xl p-6 card-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Recent Inquiries</h3>
-            <span className="text-sm text-muted-foreground">Last 7 days</span>
-          </div>
-          <div className="space-y-3">
-            {recentInquiries.map((inquiry, index) => (
-              <div key={index} className="flex items-center gap-4 p-3 rounded-xl bg-secondary/50">
-                <div className={`p-2 rounded-lg ${
-                  inquiry.type === 'WhatsApp' ? 'bg-green-100' : 'bg-blue-100'
-                }`}>
-                  {inquiry.type === 'WhatsApp' 
-                    ? <MessageCircle className="h-5 w-5 text-green-600" />
-                    : <Phone className="h-5 w-5 text-blue-600" />
-                  }
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium">{inquiry.name}</p>
-                  <p className="text-sm text-muted-foreground truncate">{inquiry.property}</p>
-                </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">{inquiry.time}</span>
+        <div className="space-y-3">
+          {recentProperties.map((property) => (
+            <div key={property.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors">
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{property.title}</p>
+                <p className="text-sm text-muted-foreground">{property.area}</p>
               </div>
-            ))}
-          </div>
+              <div className="text-right ml-4">
+                <p className="font-semibold text-price">{property.price}</p>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  property.status === 'Active' 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {property.status}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

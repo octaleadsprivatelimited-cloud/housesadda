@@ -44,7 +44,7 @@ const AdminLogin = () => {
         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
           errorMessage = "Cannot connect to server. Make sure the backend is running on port 3001.";
         } else if (error.message.includes('Invalid credentials')) {
-          errorMessage = "Invalid username or password. Default: admin/admin123";
+          errorMessage = "Invalid username or password";
         } else {
           errorMessage = error.message;
         }
@@ -122,14 +122,6 @@ const AdminLogin = () => {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-
-          {/* Demo Credentials Note */}
-          <div className="mt-6 p-4 bg-secondary rounded-xl text-center">
-            <p className="text-sm text-muted-foreground">
-              <strong>Demo Credentials:</strong><br />
-              Username: admin | Password: admin123
-            </p>
-          </div>
         </div>
 
         {/* Back to site */}
