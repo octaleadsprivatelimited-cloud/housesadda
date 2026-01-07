@@ -10,7 +10,8 @@ import {
   X,
   ChevronRight,
   Bell,
-  User
+  User,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -19,6 +20,7 @@ const menuItems = [
   { icon: Building2, label: 'Properties', path: '/admin/properties' },
   { icon: MapPin, label: 'Locations', path: '/admin/locations' },
   { icon: Tags, label: 'Property Types', path: '/admin/types' },
+  { icon: Settings, label: 'Settings', path: '/admin/settings' },
 ];
 
 const AdminLayout = () => {

@@ -18,6 +18,7 @@ import AdminProperties from "./pages/admin/AdminProperties";
 import PropertyForm from "./pages/admin/PropertyForm";
 import AdminLocations from "./pages/admin/AdminLocations";
 import AdminTypes from "./pages/admin/AdminTypes";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="properties/:id/edit" element={<PropertyForm />} />
             <Route path="locations" element={<AdminLocations />} />
             <Route path="types" element={<AdminTypes />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
           
           {/* Catch-all */}

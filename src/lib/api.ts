@@ -22,17 +22,35 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || 'Request failed');
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      // Create error object with detailed message
+      const error = new Error(data.error || data.message || `HTTP error! status: ${response.status}`);
+      (error as any).error = data.error || data.message || `Request failed with status ${response.status}`;
+      (error as any).message = data.error || data.message || `Request failed with status ${response.status}`;
+      (error as any).status = response.status;
+      throw error;
+    }
+
+    return data;
+  } catch (error: any) {
+    console.error('API request error:', error);
+    // If it's already our custom error, re-throw it
+    if (error.error || error.message) {
+      throw error;
+    }
+    // Otherwise, create a user-friendly error
+    const friendlyError = new Error(error.message || 'Network error. Please check your connection.');
+    (friendlyError as any).error = error.message || 'Network error. Please check your connection.';
+    throw friendlyError;
   }
-
-  return response.json();
 };
 
 // Auth API
@@ -50,6 +68,13 @@ export const authAPI = {
   },
   verify: async () => {
     return apiRequest('/auth/verify');
+  },
+  
+  updateCredentials: async (currentPassword: string, newUsername?: string, newPassword?: string) => {
+    return apiRequest('/auth/update-credentials', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newUsername, newPassword }),
+    });
   },
 };
 
