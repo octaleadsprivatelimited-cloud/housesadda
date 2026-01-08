@@ -1,53 +1,80 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Home, IndianRupee } from 'lucide-react';
-import { typesAPI } from '@/lib/api';
+import { Search, MapPin, Home, IndianRupee, Tag } from 'lucide-react';
+import { typesAPI, locationsAPI } from '@/lib/api';
 
-const budgetRanges = ['Budget', 'Under 50L', '50L - 1Cr', '1Cr - 2Cr', '2Cr+'];
+const budgetRanges = [
+  { label: 'Any Budget', value: '' },
+  { label: 'Under 25L', value: '0-2500000' },
+  { label: '25L - 50L', value: '2500000-5000000' },
+  { label: '50L - 75L', value: '5000000-7500000' },
+  { label: '75L - 1Cr', value: '7500000-10000000' },
+  { label: '1Cr - 2Cr', value: '10000000-20000000' },
+  { label: '2Cr - 5Cr', value: '20000000-50000000' },
+  { label: '5Cr+', value: '50000000-' },
+];
 
-interface SearchTabsProps {
-  activeTab?: string;
-}
+const transactionTypes = [
+  { label: 'Buy (Sale)', value: 'Sale' },
+  { label: 'Rent', value: 'Rent' },
+  { label: 'Lease', value: 'Lease' },
+  { label: 'PG', value: 'PG' },
+];
 
-export function SearchTabs({ activeTab = 'buy' }: SearchTabsProps) {
+export function SearchTabs() {
   const navigate = useNavigate();
-  const [currentTab, setCurrentTab] = useState(activeTab);
   const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
+  const [areas, setAreas] = useState<string[]>([]);
+  const [selectedArea, setSelectedArea] = useState('');
   const [selectedType, setSelectedType] = useState('');
-  const [selectedBudget, setSelectedBudget] = useState('Budget');
-  const [searchLocation, setSearchLocation] = useState('');
+  const [selectedBudget, setSelectedBudget] = useState('');
+  const [selectedTransaction, setSelectedTransaction] = useState('Sale');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadPropertyTypes();
+    loadData();
   }, []);
 
-  const loadPropertyTypes = async () => {
+  const loadData = async () => {
     try {
+      setIsLoading(true);
+      
+      // Load property types
       const types = await typesAPI.getAll();
       const typeNames = types.map((t: any) => t.name);
       setPropertyTypes(typeNames);
-      if (typeNames.length > 0) {
-        setSelectedType(typeNames[0]);
-      }
+      
+      // Load locations/areas
+      const locations = await locationsAPI.getAll();
+      const areaNames = locations.map((l: any) => l.name);
+      setAreas(areaNames);
+      
     } catch (error) {
-      console.error('Error loading property types:', error);
+      console.error('Error loading data:', error);
       setPropertyTypes(['Apartment', 'Villa', 'Plot', 'Commercial']);
-      setSelectedType('Apartment');
+      setAreas(['Gachibowli', 'Hitech City', 'Kondapur', 'Madhapur']);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSearch = () => {
     const params = new URLSearchParams();
     
-    // Set intent based on current tab
-    if (currentTab === 'buy') {
-      params.set('intent', 'buy');
-    } else if (currentTab === 'rent') {
-      params.set('intent', 'rent');
-    } else if (currentTab === 'pg') {
-      params.set('intent', 'pg');
-    } else if (currentTab === 'new' || currentTab === 'plot' || currentTab === 'commercial') {
-      params.set('type', currentTab);
+    // Set transaction type
+    if (selectedTransaction) {
+      if (selectedTransaction === 'Sale') {
+        params.set('intent', 'buy');
+      } else if (selectedTransaction === 'Rent') {
+        params.set('intent', 'rent');
+      } else {
+        params.set('transactionType', selectedTransaction);
+      }
+    }
+    
+    // Add area if selected
+    if (selectedArea) {
+      params.set('search', selectedArea);
     }
     
     // Add property type if selected
@@ -55,112 +82,118 @@ export function SearchTabs({ activeTab = 'buy' }: SearchTabsProps) {
       params.set('type', selectedType);
     }
     
-    // Add search location if entered
-    if (searchLocation.trim()) {
-      params.set('search', searchLocation.trim());
+    // Add budget if selected
+    if (selectedBudget) {
+      params.set('budget', selectedBudget);
     }
     
     // Navigate to properties page with filters
     navigate(`/properties?${params.toString()}`);
   };
 
-  const tabs = [
-    { id: 'buy', label: 'Buy' },
-    { id: 'rent', label: 'Rent' },
-    { id: 'new', label: 'New Projects' },
-    { id: 'pg', label: 'PG' },
-    { id: 'plot', label: 'Plot' },
-    { id: 'commercial', label: 'Commercial' },
-  ];
-
   return (
     <div className="w-full max-w-4xl mx-auto">
-      {/* Tabs */}
-      <div className="flex items-center justify-center gap-2 mb-6">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setCurrentTab(tab.id)}
-            className={`px-4 py-2 text-sm font-medium rounded transition-colors ${
-              currentTab === tab.id
-                ? 'text-primary border-b-2 border-primary bg-transparent'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
+      {/* Search Bar */}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-2">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+          {/* Area Dropdown */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+            <MapPin className="h-5 w-5 text-primary flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] text-gray-500 uppercase font-medium">Area</p>
+              <select
+                value={selectedArea}
+                onChange={(e) => setSelectedArea(e.target.value)}
+                className="w-full text-sm font-medium text-gray-800 bg-transparent outline-none cursor-pointer appearance-none truncate"
+                disabled={isLoading}
+              >
+                <option value="">All Areas</option>
+                {areas.map((area) => (
+                  <option key={area} value={area}>{area}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Property Type Dropdown */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+            <Home className="h-5 w-5 text-gray-400 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] text-gray-500 uppercase font-medium">Type</p>
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="w-full text-sm font-medium text-gray-800 bg-transparent outline-none cursor-pointer appearance-none truncate"
+                disabled={isLoading}
+              >
+                <option value="">All Types</option>
+                {propertyTypes.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Budget Dropdown */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+            <IndianRupee className="h-5 w-5 text-gray-400 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] text-gray-500 uppercase font-medium">Budget</p>
+              <select
+                value={selectedBudget}
+                onChange={(e) => setSelectedBudget(e.target.value)}
+                className="w-full text-sm font-medium text-gray-800 bg-transparent outline-none cursor-pointer appearance-none truncate"
+              >
+                {budgetRanges.map((budget) => (
+                  <option key={budget.value} value={budget.value}>{budget.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Transaction Type Dropdown */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+            <Tag className="h-5 w-5 text-gray-400 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] text-gray-500 uppercase font-medium">For</p>
+              <select
+                value={selectedTransaction}
+                onChange={(e) => setSelectedTransaction(e.target.value)}
+                className="w-full text-sm font-medium text-gray-800 bg-transparent outline-none cursor-pointer appearance-none truncate"
+              >
+                {transactionTypes.map((type) => (
+                  <option key={type.value} value={type.value}>{type.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Search Button */}
+          <button 
+            onClick={handleSearch}
+            className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-lg transition-colors"
           >
-            {tab.label}
+            <Search className="h-5 w-5" />
+            <span>Search</span>
           </button>
-        ))}
+        </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="mb-search-container">
-        {/* City/Location */}
-        <div className="flex items-center gap-2 px-4 py-2 min-w-[140px]">
-          <MapPin className="h-5 w-5 text-primary" />
-          <div>
-            <p className="text-xs text-muted-foreground">City</p>
-            <input
-              type="text"
-              placeholder="Hyderabad"
-              className="mb-search-input w-full font-medium"
-            />
-          </div>
-        </div>
-
-        <div className="mb-search-divider" />
-
-        {/* Location Search */}
-        <div className="flex-1 px-4 py-2">
-          <input
-            type="text"
-            value={searchLocation}
-            onChange={(e) => setSearchLocation(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            placeholder="Add more... Locality, Area, Project"
-            className="mb-search-input w-full"
-          />
-        </div>
-
-        <div className="mb-search-divider" />
-
-        {/* Property Type */}
-        <div className="flex items-center gap-2 px-4 py-2 min-w-[120px]">
-          <Home className="h-5 w-5 text-muted-foreground" />
-          <select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            className="mb-search-input cursor-pointer font-medium appearance-none bg-transparent pr-4"
+      {/* Quick Links */}
+      <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+        <span className="text-sm text-gray-500">Popular:</span>
+        {areas.slice(0, 5).map((area) => (
+          <button
+            key={area}
+            onClick={() => {
+              setSelectedArea(area);
+              handleSearch();
+            }}
+            className="text-sm text-gray-600 hover:text-primary transition-colors"
           >
-            {propertyTypes.map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="mb-search-divider" />
-
-        {/* Budget */}
-        <div className="flex items-center gap-2 px-4 py-2 min-w-[100px]">
-          <IndianRupee className="h-5 w-5 text-muted-foreground" />
-          <select
-            value={selectedBudget}
-            onChange={(e) => setSelectedBudget(e.target.value)}
-            className="mb-search-input cursor-pointer font-medium appearance-none bg-transparent pr-4"
-          >
-            {budgetRanges.map((budget) => (
-              <option key={budget} value={budget}>{budget}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Search Button */}
-        <button 
-          onClick={handleSearch}
-          className="mb-search-btn flex items-center gap-2"
-        >
-          <Search className="h-5 w-5" />
-          Search
-        </button>
+            {area}
+          </button>
+        ))}
       </div>
     </div>
   );

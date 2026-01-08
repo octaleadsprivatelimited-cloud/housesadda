@@ -31,24 +31,37 @@ const Properties = () => {
   const typeParam = searchParams.get('type') || '';
   const searchQuery = searchParams.get('search') || '';
   const featuredParam = searchParams.get('featured') || '';
+  const budgetParam = searchParams.get('budget') || '';
+  const transactionTypeParam = searchParams.get('transactionType') || '';
   
   const budgetRanges = [
-    { label: 'Any Budget', min: 0, max: Infinity },
-    { label: 'Under ₹50 Lakh', min: 0, max: 5000000 },
-    { label: '₹50L - ₹1 Crore', min: 5000000, max: 10000000 },
-    { label: '₹1Cr - ₹2 Crore', min: 10000000, max: 20000000 },
-    { label: '₹2Cr - ₹5 Crore', min: 20000000, max: 50000000 },
-    { label: 'Above ₹5 Crore', min: 50000000, max: Infinity },
+    { label: 'Any Budget', min: 0, max: Infinity, value: '' },
+    { label: 'Under ₹25 Lakh', min: 0, max: 2500000, value: '0-2500000' },
+    { label: '₹25L - ₹50 Lakh', min: 2500000, max: 5000000, value: '2500000-5000000' },
+    { label: '₹50L - ₹75 Lakh', min: 5000000, max: 7500000, value: '5000000-7500000' },
+    { label: '₹75L - ₹1 Crore', min: 7500000, max: 10000000, value: '7500000-10000000' },
+    { label: '₹1Cr - ₹2 Crore', min: 10000000, max: 20000000, value: '10000000-20000000' },
+    { label: '₹2Cr - ₹5 Crore', min: 20000000, max: 50000000, value: '20000000-50000000' },
+    { label: 'Above ₹5 Crore', min: 50000000, max: Infinity, value: '50000000-' },
   ];
+
+  // Find initial budget from URL param
+  const getInitialBudget = () => {
+    if (budgetParam) {
+      const found = budgetRanges.find(b => b.value === budgetParam);
+      if (found) return found;
+    }
+    return budgetRanges[0];
+  };
   
-  const [selectedArea, setSelectedArea] = useState('All Areas');
+  const [selectedArea, setSelectedArea] = useState(searchQuery || 'All Areas');
   const [selectedType, setSelectedType] = useState(typeParam || 'All Types');
-  const [selectedBudget, setSelectedBudget] = useState(budgetRanges[0]);
+  const [selectedBudget, setSelectedBudget] = useState(getInitialBudget());
 
   useEffect(() => {
     loadProperties();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [intent, typeParam, selectedArea, selectedType, searchQuery, featuredParam]);
+  }, [intent, typeParam, selectedArea, selectedType, searchQuery, featuredParam, transactionTypeParam, budgetParam]);
 
   const loadProperties = async () => {
     try {
@@ -62,6 +75,8 @@ const Properties = () => {
         params.transactionType = 'Rent';
       } else if (intent === 'pg') {
         params.transactionType = 'PG';
+      } else if (transactionTypeParam) {
+        params.transactionType = transactionTypeParam;
       }
       
       if (typeParam) {
