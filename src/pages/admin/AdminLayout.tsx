@@ -71,19 +71,6 @@ const AdminLayout = () => {
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="h-full flex flex-col">
-          {/* Logo & Brand */}
-          <div className="p-4 border-b border-white/10">
-            <Link to="/admin/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-red-500 rounded-lg flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">HA</span>
-              </div>
-              <div>
-                <h1 className="font-bold text-white text-lg">HousesAdda</h1>
-                <p className="text-xs text-gray-400">Admin Panel</p>
-              </div>
-            </Link>
-          </div>
-
           {/* User Profile Section */}
           <div className="p-4 border-b border-white/10">
             <div className="flex items-center gap-3">
