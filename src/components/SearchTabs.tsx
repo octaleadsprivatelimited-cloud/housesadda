@@ -52,7 +52,7 @@ function CustomDropdown({ label, icon, value, options, onChange, placeholder = '
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all ${
+        className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 transition-all ${
           isOpen 
             ? 'border-primary bg-primary/5' 
             : 'border-gray-100 hover:border-gray-200 bg-white'
@@ -60,16 +60,16 @@ function CustomDropdown({ label, icon, value, options, onChange, placeholder = '
       >
         <span className={`${isOpen ? 'text-primary' : 'text-gray-400'}`}>{icon}</span>
         <div className="flex-1 text-left">
-          <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">{label}</p>
-          <p className={`text-sm font-medium truncate ${selectedOption?.label ? 'text-gray-800' : 'text-gray-400'}`}>
+          <p className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">{label}</p>
+          <p className={`text-xs font-medium truncate ${selectedOption?.label ? 'text-gray-800' : 'text-gray-400'}`}>
             {selectedOption?.label || placeholder}
           </p>
         </div>
-        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-3.5 w-3.5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-lg shadow-xl border border-gray-100 py-1.5 z-50 max-h-56 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
           {options.map((option) => (
             <button
               key={option.value}
@@ -78,12 +78,12 @@ function CustomDropdown({ label, icon, value, options, onChange, placeholder = '
                 onChange(option.value);
                 setIsOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-gray-50 transition-colors ${
+              className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 transition-colors ${
                 value === option.value ? 'bg-primary/5 text-primary' : 'text-gray-700'
               }`}
             >
-              <span className="text-sm font-medium">{option.label}</span>
-              {value === option.value && <Check className="h-4 w-4 text-primary" />}
+              <span className="text-xs font-medium">{option.label}</span>
+              {value === option.value && <Check className="h-3.5 w-3.5 text-primary" />}
             </button>
           ))}
         </div>
@@ -161,15 +161,15 @@ export function SearchTabs() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4">
+    <div className="w-full max-w-4xl mx-auto px-4">
       {/* Transaction Type Tabs */}
-      <div className="flex justify-center mb-5">
-        <div className="inline-flex bg-white/80 backdrop-blur rounded-full p-1.5 shadow-lg border border-gray-100">
+      <div className="flex justify-center mb-4">
+        <div className="inline-flex bg-white/80 backdrop-blur rounded-full p-1 shadow-lg border border-gray-100">
           {transactionTypes.map((type) => (
             <button
               key={type.value}
               onClick={() => setSelectedTransaction(type.value)}
-              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+              className={`px-5 py-2 rounded-full text-xs font-semibold transition-all ${
                 selectedTransaction === type.value
                   ? 'bg-primary text-white shadow-md'
                   : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
@@ -182,12 +182,12 @@ export function SearchTabs() {
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white rounded-2xl shadow-2xl shadow-gray-200/50 p-4 md:p-5 border border-gray-100">
-        <div className="flex flex-col lg:flex-row gap-3">
+      <div className="bg-white rounded-xl shadow-2xl shadow-gray-200/50 p-3 md:p-4 border border-gray-100">
+        <div className="flex flex-col lg:flex-row gap-2">
           {/* Area Dropdown */}
           <CustomDropdown
             label="Location"
-            icon={<MapPin className="h-5 w-5" />}
+            icon={<MapPin className="h-4 w-4" />}
             value={selectedArea}
             options={areas}
             onChange={setSelectedArea}
@@ -197,7 +197,7 @@ export function SearchTabs() {
           {/* Property Type Dropdown */}
           <CustomDropdown
             label="Property Type"
-            icon={<Home className="h-5 w-5" />}
+            icon={<Home className="h-4 w-4" />}
             value={selectedType}
             options={propertyTypes}
             onChange={setSelectedType}
@@ -207,7 +207,7 @@ export function SearchTabs() {
           {/* Budget Dropdown */}
           <CustomDropdown
             label="Budget"
-            icon={<IndianRupee className="h-5 w-5" />}
+            icon={<IndianRupee className="h-4 w-4" />}
             value={selectedBudget}
             options={budgetRanges}
             onChange={setSelectedBudget}
@@ -217,9 +217,9 @@ export function SearchTabs() {
           {/* Search Button */}
           <button 
             onClick={handleSearch}
-            className="flex items-center justify-center gap-2.5 bg-gradient-to-r from-primary to-red-500 hover:from-primary/90 hover:to-red-500/90 text-white font-semibold py-4 px-10 rounded-xl transition-all hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98] min-w-[140px]"
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-red-500 hover:from-primary/90 hover:to-red-500/90 text-white font-semibold py-3 px-8 rounded-lg transition-all hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98] min-w-[120px] text-sm"
           >
-            <Search className="h-5 w-5" />
+            <Search className="h-4 w-4" />
             <span>Search</span>
           </button>
         </div>
@@ -227,8 +227,8 @@ export function SearchTabs() {
 
       {/* Popular Searches */}
       {areas.length > 1 && (
-        <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
-          <span className="text-sm text-gray-400 font-medium">Popular:</span>
+        <div className="flex flex-wrap items-center justify-center gap-1.5 mt-4">
+          <span className="text-xs text-gray-400 font-medium">Popular:</span>
           {areas.slice(1, 6).map((area) => (
             <button
               key={area.value}
@@ -236,7 +236,7 @@ export function SearchTabs() {
                 setSelectedArea(area.value);
                 setTimeout(handleSearch, 100);
               }}
-              className="px-4 py-1.5 text-sm text-gray-500 hover:text-white hover:bg-primary bg-white/80 backdrop-blur border border-gray-200 hover:border-primary rounded-full transition-all shadow-sm"
+              className="px-3 py-1 text-xs text-gray-500 hover:text-white hover:bg-primary bg-white/80 backdrop-blur border border-gray-200 hover:border-primary rounded-full transition-all shadow-sm"
             >
               {area.label}
             </button>
