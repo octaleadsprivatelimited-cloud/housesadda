@@ -67,42 +67,78 @@ const PropertyDetail = () => {
   const loadSimilarProperties = async (currentProperty: any) => {
     try {
       setIsLoadingSimilar(true);
-      // Filter by same area and transaction type
-      const params: any = {
-        active: true,
-        transactionType: currentProperty.transactionType || 'Sale',
-      };
-      
-      // The backend returns location_name, but we need to use area for filtering
-      // Check both area and location_name fields
+      const transactionType = currentProperty.transactionType || 'Sale';
       const areaToFilter = currentProperty.area || currentProperty.location_name;
+      const propertyType = currentProperty.type;
+      const city = currentProperty.city || 'Hyderabad';
+      
+      let similarData: any[] = [];
+      
+      // Strategy 1: Same area + same transaction type
       if (areaToFilter) {
-        params.area = areaToFilter;
+        const areaData = await propertiesAPI.getAll({
+          active: true,
+          transactionType: transactionType,
+          area: areaToFilter,
+        });
+        similarData = areaData.filter((p: any) => String(p.id) !== String(currentProperty.id));
       }
       
-      const data = await propertiesAPI.getAll(params);
+      // Strategy 2: If not enough, try same property type + transaction type
+      if (similarData.length < 6 && propertyType) {
+        const typeData = await propertiesAPI.getAll({
+          active: true,
+          transactionType: transactionType,
+          type: propertyType,
+        });
+        const typeFiltered = typeData.filter((p: any) => 
+          String(p.id) !== String(currentProperty.id) && 
+          !similarData.some(s => String(s.id) === String(p.id))
+        );
+        similarData = [...similarData, ...typeFiltered].slice(0, 6);
+      }
       
-      // Filter out current property and transform to Property format
-      const similar = data
-        .filter((p: any) => String(p.id) !== String(currentProperty.id))
-        .slice(0, 6) // Limit to 6 similar properties
-        .map((prop: any) => ({
-          id: String(prop.id),
-          title: prop.title,
-          type: prop.type || 'Apartment',
-          city: prop.city || 'Hyderabad',
-          area: prop.area || '',
-          price: prop.price,
-          priceUnit: 'onwards',
-          bedrooms: prop.bedrooms,
-          bathrooms: prop.bathrooms,
-          sqft: prop.sqft,
-          image: prop.image || prop.images?.[0] || '',
-          imageCount: prop.images?.length || 0,
-          isFeatured: prop.isFeatured,
-          isVerified: true,
-          brochureUrl: prop.brochureUrl,
-        }));
+      // Strategy 3: If still not enough, try same transaction type only
+      if (similarData.length < 6) {
+        const transactionData = await propertiesAPI.getAll({
+          active: true,
+          transactionType: transactionType,
+        });
+        const transactionFiltered = transactionData.filter((p: any) => 
+          String(p.id) !== String(currentProperty.id) && 
+          !similarData.some(s => String(s.id) === String(p.id))
+        );
+        similarData = [...similarData, ...transactionFiltered].slice(0, 6);
+      }
+      
+      // Strategy 4: If still not enough, get any active properties
+      if (similarData.length < 3) {
+        const allData = await propertiesAPI.getAll({ active: true });
+        const allFiltered = allData.filter((p: any) => 
+          String(p.id) !== String(currentProperty.id) && 
+          !similarData.some(s => String(s.id) === String(p.id))
+        );
+        similarData = [...similarData, ...allFiltered].slice(0, 6);
+      }
+      
+      // Transform to Property format
+      const similar = similarData.slice(0, 6).map((prop: any) => ({
+        id: String(prop.id),
+        title: prop.title,
+        type: prop.type || 'Apartment',
+        city: prop.city || 'Hyderabad',
+        area: prop.area || '',
+        price: prop.price,
+        priceUnit: 'onwards',
+        bedrooms: prop.bedrooms,
+        bathrooms: prop.bathrooms,
+        sqft: prop.sqft,
+        image: prop.image || prop.images?.[0] || '',
+        imageCount: prop.images?.length || 0,
+        isFeatured: prop.isFeatured,
+        isVerified: true,
+        brochureUrl: prop.brochureUrl,
+      }));
       
       setSimilarProperties(similar);
     } catch (error) {
@@ -536,11 +572,13 @@ const PropertyDetail = () => {
         {similarProperties.length > 0 && (
           <div className="container py-8">
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Similar Properties in {propertyData.area}
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Similar Properties {propertyData.area ? `in ${propertyData.area}` : ''}
               </h2>
               <p className="text-gray-600 mb-6">
-                Other {propertyData.transactionType} properties in {propertyData.area}, {propertyData.city}
+                {propertyData.transactionType === 'Sale' ? 'Properties for Sale' : 
+                 propertyData.transactionType === 'Rent' ? 'Properties for Rent' : 
+                 `${propertyData.transactionType} Properties`} you might be interested in
               </p>
               
               {isLoadingSimilar ? (
@@ -558,9 +596,9 @@ const PropertyDetail = () => {
               
               {similarProperties.length > 0 && (
                 <div className="mt-6 text-center">
-                  <Link to={`/properties?intent=${propertyData.transactionType === 'Sale' ? 'buy' : 'rent'}&area=${encodeURIComponent(propertyData.area)}`}>
+                  <Link to={`/properties?intent=${propertyData.transactionType === 'Sale' ? 'buy' : 'rent'}${propertyData.area ? `&search=${encodeURIComponent(propertyData.area)}` : ''}`}>
                     <Button variant="outline" className="px-6">
-                      View All {propertyData.transactionType} Properties in {propertyData.area}
+                      View More {propertyData.transactionType === 'Sale' ? 'Sale' : propertyData.transactionType} Properties
                     </Button>
                   </Link>
                 </div>
