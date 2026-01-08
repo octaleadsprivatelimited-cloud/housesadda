@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Building2, 
-  Eye, 
-  Star, 
   Plus,
   ArrowUpRight,
   Loader2,
@@ -11,17 +9,12 @@ import {
   Key,
   FileText,
   Users,
-  Calendar,
   MapPin,
-  CheckCircle2,
-  XCircle,
   Clock,
-  TrendingUp,
   Search,
   UserPlus,
   Activity,
-  BarChart2,
-  MessageCircle
+  BarChart2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { propertiesAPI } from '@/lib/api';
@@ -43,123 +36,6 @@ const MiniBarChart = ({ color }: { color: string }) => {
     </div>
   );
 };
-
-// Area chart component for visitor statistics
-const AreaChart = () => {
-  const months = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
-  const recurrentData = [65, 150, 90, 80, 120, 130, 50];
-  const uniqueData = [50, 30, 75, 60, 45, 70, 20];
-  
-  return (
-    <div className="h-64 relative">
-      {/* Y-axis labels */}
-      <div className="absolute left-0 top-0 bottom-8 w-16 flex flex-col justify-between text-xs text-gray-500">
-        <span>175 visitors</span>
-        <span>150 visitors</span>
-        <span>125 visitors</span>
-        <span>100 visitors</span>
-        <span>75 visitors</span>
-        <span>50 visitors</span>
-        <span>25 visitors</span>
-        <span>0 visitors</span>
-      </div>
-      
-      {/* Chart area */}
-      <div className="ml-20 h-full flex items-end gap-4 pr-4">
-        <svg viewBox="0 0 700 200" className="w-full h-48" preserveAspectRatio="none">
-          {/* Grid lines */}
-          {[0, 1, 2, 3, 4, 5, 6, 7].map((_, i) => (
-            <line
-              key={i}
-              x1="0"
-              y1={i * 25}
-              x2="700"
-              y2={i * 25}
-              stroke="#e5e7eb"
-              strokeWidth="1"
-            />
-          ))}
-          
-          {/* Purple area (Recurrent) */}
-          <path
-            d={`M0,200 L0,${200 - recurrentData[0]} ${recurrentData.map((d, i) => `L${i * 116},${200 - d}`).join(' ')} L700,${200 - recurrentData[6]} L700,200 Z`}
-            fill="rgba(139, 92, 246, 0.5)"
-          />
-          <path
-            d={`M0,${200 - recurrentData[0]} ${recurrentData.map((d, i) => `L${i * 116},${200 - d}`).join(' ')}`}
-            fill="none"
-            stroke="#8b5cf6"
-            strokeWidth="2"
-          />
-          
-          {/* Blue area (Unique) */}
-          <path
-            d={`M0,200 L0,${200 - uniqueData[0]} ${uniqueData.map((d, i) => `L${i * 116},${200 - d}`).join(' ')} L700,${200 - uniqueData[6]} L700,200 Z`}
-            fill="rgba(59, 130, 246, 0.5)"
-          />
-          <path
-            d={`M0,${200 - uniqueData[0]} ${uniqueData.map((d, i) => `L${i * 116},${200 - d}`).join(' ')}`}
-            fill="none"
-            stroke="#3b82f6"
-            strokeWidth="2"
-          />
-          
-          {/* Data points */}
-          {recurrentData.map((d, i) => (
-            <circle key={`r-${i}`} cx={i * 116} cy={200 - d} r="4" fill="#8b5cf6" />
-          ))}
-          {uniqueData.map((d, i) => (
-            <circle key={`u-${i}`} cx={i * 116} cy={200 - d} r="4" fill="#3b82f6" />
-          ))}
-        </svg>
-      </div>
-      
-      {/* X-axis labels */}
-      <div className="ml-20 flex justify-between text-xs text-gray-500 mt-2 pr-4">
-        {months.map((month) => (
-          <span key={month}>{month}</span>
-        ))}
-      </div>
-      
-      {/* Legend */}
-      <div className="absolute top-0 right-4 flex items-center gap-4 text-xs">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-          <span className="text-gray-600">Recurrent</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-          <span className="text-gray-600">Uniques</span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Message item component
-const MessageItem = ({ name, message, time, color, isOnline }: { 
-  name: string; 
-  message: string; 
-  time: string; 
-  color: string;
-  isOnline: boolean;
-}) => (
-  <div className="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0">
-    <div className="relative">
-      <div className={`w-10 h-10 rounded-full ${color} flex items-center justify-center text-white font-semibold text-sm`}>
-        {name.charAt(0)}
-      </div>
-      <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
-    </div>
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center justify-between mb-1">
-        <h4 className={`font-semibold text-sm ${isOnline ? 'text-blue-600' : 'text-gray-700'}`}>{name}</h4>
-        <span className="text-xs text-gray-400">{time}</span>
-      </div>
-      <p className="text-xs text-gray-500 line-clamp-2">{message}</p>
-    </div>
-  </div>
-);
 
 const AdminDashboard = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
@@ -262,13 +138,6 @@ const AdminDashboard = () => {
     },
   ];
 
-  const messages = [
-    { name: 'Mirchi', message: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit...', time: '2h', color: 'bg-orange-500', isOnline: true },
-    { name: 'Mohan', message: 'Nunc sed ultrices ipsum. Maecenas euismod lectus vel nulla semper...', time: '3h', color: 'bg-blue-500', isOnline: true },
-    { name: 'Alex', message: 'Sed fringilla ac augue ut tincidunt. Curabitur iaculis nulla sit...', time: '4h', color: 'bg-purple-500', isOnline: false },
-    { name: 'Priya', message: 'Donec eget dolor in leo cursus tristique. Praesent quis mattis nulla....', time: '4h', color: 'bg-teal-500', isOnline: false },
-  ];
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -319,43 +188,29 @@ const AdminDashboard = () => {
         ))}
       </div>
 
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {statCards.map((stat) => (
+          <div 
+            key={stat.label}
+            className={`${stat.bgColor} rounded-xl p-4 text-white shadow-lg relative overflow-hidden`}
+          >
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <p className="text-white/80 text-xs font-medium mb-1">{stat.label}</p>
+                <p className="text-2xl font-bold">{stat.value}{stat.suffix}</p>
+              </div>
+              <stat.icon className="h-8 w-8 text-white/50" />
+            </div>
+            <MiniBarChart color={stat.barColor} />
+          </div>
+        ))}
+      </div>
+
       {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left Column - Stats & Chart */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Stat Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {statCards.map((stat, index) => (
-              <div 
-                key={stat.label}
-                className={`${stat.bgColor} rounded-xl p-4 text-white shadow-lg relative overflow-hidden`}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-white/80 text-xs font-medium mb-1">{stat.label}</p>
-                    <p className="text-2xl font-bold">{stat.value}{stat.suffix}</p>
-                  </div>
-                  <stat.icon className="h-8 w-8 text-white/50" />
-                </div>
-                <MiniBarChart color={stat.barColor} />
-              </div>
-            ))}
-          </div>
-
-          {/* Visitor Statistics Chart */}
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-800">Visitor Statistics</h3>
-              <select className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600">
-                <option>This Month</option>
-                <option>Last Month</option>
-                <option>This Year</option>
-              </select>
-            </div>
-            <AreaChart />
-          </div>
-
-          {/* Recent Properties */}
+        {/* Left Column - Recent Properties */}
+        <div className="lg:col-span-2">
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="p-4 border-b border-gray-100">
               <div className="flex items-center justify-between">
@@ -433,27 +288,8 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Right Column - Messages & Activity */}
+        {/* Right Column - Activity & Quick Stats */}
         <div className="space-y-6">
-          {/* Unread Messages */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-gray-800">Unread Messages</h3>
-                <span className="px-2 py-0.5 bg-green-500 text-white text-xs font-bold rounded-full">33</span>
-              </div>
-            </div>
-            <div className="p-4">
-              {messages.map((msg, index) => (
-                <MessageItem key={index} {...msg} />
-              ))}
-            </div>
-            <div className="px-4 pb-4 flex items-center justify-between">
-              <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">Read All</button>
-              <button className="text-sm text-red-500 hover:text-red-600 font-medium">Dismiss All</button>
-            </div>
-          </div>
-
           {/* Activity Feed */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="p-4 border-b border-gray-100">
