@@ -516,7 +516,7 @@ const PropertyDetail = () => {
               {/* Location Map */}
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Location</h2>
-                {propertyData.mapUrl && propertyData.mapUrl.includes('google.com/maps') ? (
+                {propertyData.mapUrl && propertyData.mapUrl.includes('google.com/maps/embed') ? (
                   <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 mb-4">
                     <iframe
                       src={propertyData.mapUrl}
@@ -537,7 +537,9 @@ const PropertyDetail = () => {
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">{propertyData.area}</h3>
                     <p className="text-gray-600 mb-4">{propertyData.city}</p>
                     <a
-                      href={`https://www.google.com/maps/search/${encodeURIComponent(propertyData.area + ', ' + propertyData.city)}`}
+                      href={propertyData.mapUrl && propertyData.mapUrl.includes('google.com/maps') 
+                        ? propertyData.mapUrl 
+                        : `https://www.google.com/maps/search/${encodeURIComponent(propertyData.area + ', ' + propertyData.city)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-full font-medium hover:bg-primary/90 transition-colors shadow-lg"
@@ -548,7 +550,9 @@ const PropertyDetail = () => {
                   </div>
                 )}
                 <a
-                  href={`https://www.google.com/maps/search/${encodeURIComponent(propertyData.area + ', ' + propertyData.city)}`}
+                  href={propertyData.mapUrl && propertyData.mapUrl.includes('google.com/maps') 
+                    ? propertyData.mapUrl 
+                    : `https://www.google.com/maps/search/${encodeURIComponent(propertyData.area + ', ' + propertyData.city)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
