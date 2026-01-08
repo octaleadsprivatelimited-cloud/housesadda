@@ -153,7 +153,7 @@ export function SearchTabs() {
       }
     }
     
-    if (selectedArea) params.set('search', selectedArea);
+    if (selectedArea) params.set('area', selectedArea);
     if (selectedType) params.set('type', selectedType);
     if (selectedBudget) params.set('budget', selectedBudget);
     

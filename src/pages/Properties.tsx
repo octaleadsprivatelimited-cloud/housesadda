@@ -30,6 +30,7 @@ const Properties = () => {
   const intent = searchParams.get('intent') || '';
   const typeParam = searchParams.get('type') || '';
   const searchQuery = searchParams.get('search') || '';
+  const areaParam = searchParams.get('area') || '';
   const featuredParam = searchParams.get('featured') || '';
   const budgetParam = searchParams.get('budget') || '';
   const transactionTypeParam = searchParams.get('transactionType') || '';
@@ -54,14 +55,14 @@ const Properties = () => {
     return budgetRanges[0];
   };
   
-  const [selectedArea, setSelectedArea] = useState(searchQuery || 'All Areas');
+  const [selectedArea, setSelectedArea] = useState(areaParam || 'All Areas');
   const [selectedType, setSelectedType] = useState(typeParam || 'All Types');
   const [selectedBudget, setSelectedBudget] = useState(getInitialBudget());
 
   useEffect(() => {
     loadProperties();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [intent, typeParam, selectedArea, selectedType, searchQuery, featuredParam, transactionTypeParam, budgetParam]);
+  }, [intent, typeParam, areaParam, searchQuery, featuredParam, transactionTypeParam, budgetParam]);
 
   const loadProperties = async () => {
     try {
@@ -79,11 +80,17 @@ const Properties = () => {
         params.transactionType = transactionTypeParam;
       }
       
+      // Add type filter
       if (typeParam) {
         params.type = typeParam;
       }
       
-      // Add search query if present
+      // Add area filter (location)
+      if (areaParam) {
+        params.area = areaParam;
+      }
+      
+      // Add search query if present (for title/description search)
       if (searchQuery) {
         params.search = searchQuery;
       }
@@ -93,6 +100,7 @@ const Properties = () => {
         params.featured = true;
       }
       
+      console.log('🔍 Loading properties with params:', params);
       const data = await propertiesAPI.getAll(params);
       
       // Transform API data to Property format
@@ -152,13 +160,29 @@ const Properties = () => {
     }
   };
 
-  // Filter properties
+  // Sync state with URL params
+  useEffect(() => {
+    if (areaParam) setSelectedArea(areaParam);
+    else setSelectedArea('All Areas');
+  }, [areaParam]);
+
+  useEffect(() => {
+    if (typeParam) setSelectedType(typeParam);
+    else setSelectedType('All Types');
+  }, [typeParam]);
+
+  // Filter properties (only apply budget filter locally, rest is handled by API)
   const filteredProperties = properties.filter((property) => {
-    const areaMatch = selectedArea === 'All Areas' || property.area === selectedArea;
-    const typeMatch = selectedType === 'All Types' || property.type === selectedType;
+    // Budget filter (local only since API doesn't support it yet)
     const budgetMatch = property.price >= selectedBudget.min && property.price <= selectedBudget.max;
     
-    // Local search filter for area names (in case backend search didn't match)
+    // Local area filter (in case of additional filtering from dropdown)
+    const areaMatch = selectedArea === 'All Areas' || !areaParam || property.area === selectedArea;
+    
+    // Local type filter
+    const typeMatch = selectedType === 'All Types' || !typeParam || property.type === selectedType;
+    
+    // Local search filter for title/description
     let searchMatch = true;
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -169,7 +193,7 @@ const Properties = () => {
         property.type?.toLowerCase().includes(query);
     }
     
-    return areaMatch && typeMatch && budgetMatch && searchMatch;
+    return budgetMatch && areaMatch && typeMatch && searchMatch;
   });
 
   const clearFilters = () => {
@@ -190,6 +214,7 @@ const Properties = () => {
           <div className="container">
             <h1 className="text-2xl md:text-4xl font-bold mb-2">
               {searchQuery ? `Search: "${searchQuery}"` : 
+               areaParam ? `Properties in ${areaParam}` :
                featuredParam === 'true' ? 'Featured Properties' : 'All Properties'}
             </h1>
             <p className="text-primary-foreground/80">
@@ -197,7 +222,8 @@ const Properties = () => {
               {intent === 'buy' && ' for Sale'}
               {intent === 'rent' && ' for Rent'}
               {featuredParam === 'true' && ' (Featured)'}
-              {typeParam && ` in ${typeParam}`}
+              {typeParam && ` - ${typeParam}`}
+              {areaParam && !searchQuery && ` in ${areaParam}`}
             </p>
           </div>
         </section>
