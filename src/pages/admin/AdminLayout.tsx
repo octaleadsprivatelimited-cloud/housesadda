@@ -7,18 +7,10 @@ import {
   Tags, 
   LogOut, 
   Menu, 
-  X,
-  Bell,
-  Mail,
   Search,
   Settings,
   User,
-  ChevronDown,
-  BarChart3,
-  Table,
-  FileText,
-  Layers,
-  BookOpen
+  ChevronDown
 } from 'lucide-react';
 
 const menuItems = [
@@ -194,29 +186,13 @@ const AdminLayout = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* Notification Icons */}
-              <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                <Mail className="h-5 w-5 text-gray-600" />
-                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                  300
-                </span>
-              </button>
-              <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                <Bell className="h-5 w-5 text-gray-600" />
-                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-green-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                  120
-                </span>
-              </button>
-              
-              {/* User Dropdown */}
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 cursor-pointer ml-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-red-500 flex items-center justify-center">
-                  <User className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-sm font-medium text-gray-700 hidden sm:block">{adminName}</span>
-                <ChevronDown className="h-4 w-4 text-gray-400" />
+            {/* User Dropdown */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-red-500 flex items-center justify-center">
+                <User className="h-4 w-4 text-white" />
               </div>
+              <span className="text-sm font-medium text-gray-700 hidden sm:block">{adminName}</span>
+              <ChevronDown className="h-4 w-4 text-gray-400" />
             </div>
           </div>
         </header>
