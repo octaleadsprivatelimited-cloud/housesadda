@@ -52,7 +52,7 @@ function CustomDropdown({ label, icon, value, options, onChange, placeholder = '
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 transition-all ${
+        className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-all ${
           isOpen 
             ? 'border-primary bg-primary/5' 
             : 'border-gray-100 hover:border-gray-200 bg-white'
