@@ -1,34 +1,95 @@
-import { ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { propertiesAPI } from '@/lib/api';
 
-const categories = [
-  {
-    id: 1,
-    count: '500+',
-    title: 'Verified Properties',
-    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600&h=400&fit=crop&q=80',
-  },
-  {
-    id: 2,
-    count: '50+',
-    title: 'New Projects',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&h=400&fit=crop&q=80',
-  },
-  {
-    id: 3,
-    count: '100+',
-    title: 'Individual Houses/Villas',
-    image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600&h=400&fit=crop&q=80',
-  },
-  {
-    id: 4,
-    count: '200+',
-    title: 'Luxury Properties',
-    image: 'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=600&h=400&fit=crop&q=80',
-  },
+interface Category {
+  id: number;
+  count: string;
+  title: string;
+  image: string;
+  link: string;
+}
+
+const categoryImages = [
+  'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600&h=400&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&h=400&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600&h=400&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=600&h=400&fit=crop&q=80',
 ];
 
 export function CategoryCards() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      setIsLoading(true);
+      const properties = await propertiesAPI.getAll({ active: true });
+      
+      // Count properties by different categories
+      const totalCount = properties.length;
+      const saleCount = properties.filter((p: any) => p.transactionType === 'Sale').length;
+      const rentCount = properties.filter((p: any) => p.transactionType === 'Rent').length;
+      const featuredCount = properties.filter((p: any) => p.isFeatured).length;
+
+      setCategories([
+        {
+          id: 1,
+          count: totalCount.toString(),
+          title: 'All Properties',
+          image: categoryImages[0],
+          link: '/properties',
+        },
+        {
+          id: 2,
+          count: saleCount.toString(),
+          title: 'Properties for Sale',
+          image: categoryImages[1],
+          link: '/properties?intent=buy',
+        },
+        {
+          id: 3,
+          count: rentCount.toString(),
+          title: 'Properties for Rent',
+          image: categoryImages[2],
+          link: '/properties?intent=rent',
+        },
+        {
+          id: 4,
+          count: featuredCount.toString(),
+          title: 'Featured Properties',
+          image: categoryImages[3],
+          link: '/properties?featured=true',
+        },
+      ]);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      setCategories([
+        { id: 1, count: '0', title: 'All Properties', image: categoryImages[0], link: '/properties' },
+        { id: 2, count: '0', title: 'Properties for Sale', image: categoryImages[1], link: '/properties?intent=buy' },
+        { id: 3, count: '0', title: 'Properties for Rent', image: categoryImages[2], link: '/properties?intent=rent' },
+        { id: 4, count: '0', title: 'Featured Properties', image: categoryImages[3], link: '/properties?featured=true' },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <section className="py-10 md:py-14 bg-background">
+        <div className="container flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-10 md:py-14 bg-background">
       <div className="container">
@@ -40,7 +101,7 @@ export function CategoryCards() {
           {categories.map((category) => (
             <Link
               key={category.id}
-              to="/properties"
+              to={category.link}
               className="mb-category-card aspect-[4/3]"
             >
               <img src={category.image} alt={category.title} />

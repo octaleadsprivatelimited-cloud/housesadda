@@ -30,6 +30,7 @@ const Properties = () => {
   const intent = searchParams.get('intent') || '';
   const typeParam = searchParams.get('type') || '';
   const searchQuery = searchParams.get('search') || '';
+  const featuredParam = searchParams.get('featured') || '';
   
   const budgetRanges = [
     { label: 'Any Budget', min: 0, max: Infinity },
@@ -47,7 +48,7 @@ const Properties = () => {
   useEffect(() => {
     loadProperties();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [intent, typeParam, selectedArea, selectedType, searchQuery]);
+  }, [intent, typeParam, selectedArea, selectedType, searchQuery, featuredParam]);
 
   const loadProperties = async () => {
     try {
@@ -70,6 +71,11 @@ const Properties = () => {
       // Add search query if present
       if (searchQuery) {
         params.search = searchQuery;
+      }
+      
+      // Add featured filter if present
+      if (featuredParam === 'true') {
+        params.featured = true;
       }
       
       const data = await propertiesAPI.getAll(params);
@@ -168,12 +174,14 @@ const Properties = () => {
         <section className="hero-gradient text-primary-foreground py-12 md:py-16">
           <div className="container">
             <h1 className="text-2xl md:text-4xl font-bold mb-2">
-              {searchQuery ? `Search: "${searchQuery}"` : 'All Properties'}
+              {searchQuery ? `Search: "${searchQuery}"` : 
+               featuredParam === 'true' ? 'Featured Properties' : 'All Properties'}
             </h1>
             <p className="text-primary-foreground/80">
               {filteredProperties.length} properties found
               {intent === 'buy' && ' for Sale'}
               {intent === 'rent' && ' for Rent'}
+              {featuredParam === 'true' && ' (Featured)'}
               {typeParam && ` in ${typeParam}`}
             </p>
           </div>
