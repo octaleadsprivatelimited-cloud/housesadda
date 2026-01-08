@@ -26,7 +26,7 @@ const AdminLayout = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [adminName, setAdminName] = useState('Admin');
+  const [adminName, setAdminName] = useState('Sreekanth');
 
   useEffect(() => {
     const session = localStorage.getItem('adminSession');
@@ -88,19 +88,12 @@ const AdminLayout = () => {
           {/* User Profile Section */}
           <div className="p-4 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg">
-                  <User className="h-6 w-6 text-white" />
-                </div>
-                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-[#2c3e50]"></div>
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg">
+                <User className="h-6 w-6 text-white" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-white font-semibold text-sm truncate">Welcome, {adminName}</h3>
                 <p className="text-gray-400 text-xs">Administrator</p>
-                <div className="flex items-center gap-1 mt-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-green-400 text-xs">Online</span>
-                </div>
               </div>
             </div>
           </div>
