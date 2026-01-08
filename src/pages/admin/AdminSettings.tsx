@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, Save, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, AlertCircle, Shield, Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { authAPI } from '@/lib/api';
 
@@ -62,7 +61,6 @@ const AdminSettings = () => {
       return;
     }
 
-    // Check if at least one field is being updated
     if (!formData.newUsername && !formData.newPassword) {
       toast({
         title: "No Changes",
@@ -86,7 +84,6 @@ const AdminSettings = () => {
         description: response.message || "Credentials updated successfully",
       });
 
-      // Clear form
       setFormData({
         currentPassword: '',
         newUsername: '',
@@ -94,7 +91,6 @@ const AdminSettings = () => {
         confirmPassword: '',
       });
 
-      // If username changed, update session and redirect to login
       if (formData.newUsername) {
         toast({
           title: "Username Changed",
@@ -105,18 +101,15 @@ const AdminSettings = () => {
           navigate('/admin');
         }, 2000);
       } else {
-        // If only password changed, just show success
         toast({
           title: "Password Changed",
           description: "Your password has been updated successfully",
         });
       }
     } catch (error: any) {
-      // Extract detailed error message from API response
       let errorTitle = "Update Failed";
       let errorMessage = "Failed to update credentials. Please try again.";
       
-      // Check for specific error types
       if (error.error) {
         errorMessage = error.error;
       } else if (error.message) {
@@ -125,7 +118,6 @@ const AdminSettings = () => {
         errorMessage = error;
       }
       
-      // Set specific titles based on error type
       if (errorMessage.toLowerCase().includes('current password')) {
         errorTitle = "Incorrect Current Password";
       } else if (errorMessage.toLowerCase().includes('username already exists')) {
@@ -143,14 +135,12 @@ const AdminSettings = () => {
         errorMessage = "An error occurred on the server. Please try again later.";
       }
       
-      // Show detailed error message
       toast({
         title: errorTitle,
         description: errorMessage,
         variant: "destructive",
       });
       
-      // Clear sensitive fields on error (except username)
       setFormData(prev => ({
         ...prev,
         currentPassword: '',
@@ -165,181 +155,199 @@ const AdminSettings = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold">Account Settings</h1>
-        <p className="text-muted-foreground">Update your username and password</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Account Settings</h1>
+          <p className="text-gray-500 text-sm">Update your username and password</p>
+        </div>
       </div>
 
-      {/* Settings Form */}
-      <div className="bg-card rounded-2xl card-shadow p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Current Password */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium flex items-center gap-2">
-              <Lock className="h-4 w-4" />
-              Current Password <span className="text-destructive">*</span>
-            </label>
-            <div className="relative">
-              <Input
-                type={showCurrentPassword ? 'text' : 'password'}
-                value={formData.currentPassword}
-                onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                placeholder="Enter your current password"
-                className={errors.currentPassword ? 'border-destructive' : ''}
-              />
-              <button
-                type="button"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+      <div className="max-w-2xl">
+        {/* Settings Form */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Shield className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">Security Settings</h2>
+                <p className="text-xs text-gray-500">Manage your account credentials</p>
+              </div>
             </div>
-            {errors.currentPassword && (
-              <p className="text-sm text-destructive flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.currentPassword}
-              </p>
-            )}
           </div>
 
-          {/* New Username */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium flex items-center gap-2">
-              <User className="h-4 w-4" />
-              New Username (Optional)
-            </label>
-            <Input
-              type="text"
-              value={formData.newUsername}
-              onChange={(e) => setFormData({ ...formData, newUsername: e.target.value })}
-              placeholder="Enter new username (leave empty to keep current)"
-              className={errors.newUsername ? 'border-destructive' : ''}
-            />
-            {errors.newUsername && (
-              <p className="text-sm text-destructive flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.newUsername}
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              If changed, you'll need to login again with the new username
-            </p>
-          </div>
-
-          {/* New Password */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium flex items-center gap-2">
-              <Lock className="h-4 w-4" />
-              New Password (Optional)
-            </label>
-            <div className="relative">
-              <Input
-                type={showNewPassword ? 'text' : 'password'}
-                value={formData.newPassword}
-                onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                placeholder="Enter new password (leave empty to keep current)"
-                className={errors.newPassword ? 'border-destructive' : ''}
-              />
-              <button
-                type="button"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-            {errors.newPassword && (
-              <p className="text-sm text-destructive flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.newPassword}
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Password must be at least 6 characters long
-            </p>
-          </div>
-
-          {/* Confirm Password */}
-          {formData.newPassword && (
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* Current Password */}
             <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Lock className="h-4 w-4" />
-                Confirm New Password
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Lock className="h-4 w-4 text-gray-400" />
+                Current Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <Input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  placeholder="Confirm your new password"
-                  className={errors.confirmPassword ? 'border-destructive' : ''}
+                <input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={formData.currentPassword}
+                  onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
+                  placeholder="Enter your current password"
+                  className={`w-full px-4 py-2.5 pr-10 rounded-lg border ${errors.currentPassword ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-primary'} focus:ring-2 ${errors.currentPassword ? 'focus:ring-red-200' : 'focus:ring-primary/20'} outline-none text-sm`}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive flex items-center gap-1">
+              {errors.currentPassword && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
-                  {errors.confirmPassword}
+                  {errors.currentPassword}
                 </p>
               )}
             </div>
-          )}
 
-          {/* Info Box */}
-          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-blue-800 dark:text-blue-200">
-                <p className="font-medium mb-1">Important Notes:</p>
-                <ul className="list-disc list-inside space-y-1 text-xs">
-                  <li>Current password is required to make any changes</li>
-                  <li>You can update username, password, or both</li>
-                  <li>If you change your username, you'll be logged out and need to login again</li>
-                  <li>New password must be at least 6 characters long</li>
-                </ul>
+            {/* New Username */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <User className="h-4 w-4 text-gray-400" />
+                New Username <span className="text-gray-400 text-xs">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={formData.newUsername}
+                onChange={(e) => setFormData({ ...formData, newUsername: e.target.value })}
+                placeholder="Enter new username"
+                className={`w-full px-4 py-2.5 rounded-lg border ${errors.newUsername ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-primary'} focus:ring-2 ${errors.newUsername ? 'focus:ring-red-200' : 'focus:ring-primary/20'} outline-none text-sm`}
+              />
+              {errors.newUsername && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.newUsername}
+                </p>
+              )}
+              <p className="text-xs text-gray-500">Leave empty to keep current username</p>
+            </div>
+
+            {/* New Password */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Lock className="h-4 w-4 text-gray-400" />
+                New Password <span className="text-gray-400 text-xs">(optional)</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={formData.newPassword}
+                  onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                  placeholder="Enter new password"
+                  className={`w-full px-4 py-2.5 pr-10 rounded-lg border ${errors.newPassword ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-primary'} focus:ring-2 ${errors.newPassword ? 'focus:ring-red-200' : 'focus:ring-primary/20'} outline-none text-sm`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.newPassword && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.newPassword}
+                </p>
+              )}
+              <p className="text-xs text-gray-500">Minimum 6 characters</p>
+            </div>
+
+            {/* Confirm Password */}
+            {formData.newPassword && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Lock className="h-4 w-4 text-gray-400" />
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    placeholder="Confirm your new password"
+                    className={`w-full px-4 py-2.5 pr-10 rounded-lg border ${errors.confirmPassword ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-primary'} focus:ring-2 ${errors.confirmPassword ? 'focus:ring-red-200' : 'focus:ring-primary/20'} outline-none text-sm`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.confirmPassword}
+                  </p>
+                )}
+                {formData.newPassword && formData.confirmPassword && formData.newPassword === formData.confirmPassword && (
+                  <p className="text-sm text-green-500 flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3" />
+                    Passwords match
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Info Box */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-800">
+                  <p className="font-medium mb-1">Important Notes:</p>
+                  <ul className="list-disc list-inside space-y-1 text-xs text-blue-700">
+                    <li>Current password is required for any changes</li>
+                    <li>You can update username, password, or both</li>
+                    <li>Changing username will log you out</li>
+                    <li>Password must be at least 6 characters</li>
+                  </ul>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate('/admin/dashboard')}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="accent-gradient text-accent-foreground font-semibold"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="animate-spin mr-2">⏳</span>
-                  Updating...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Update Credentials
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
+            {/* Submit Button */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/admin/dashboard')}
+                className="border-gray-200"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/30"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Update Credentials
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
 };
 
 export default AdminSettings;
-

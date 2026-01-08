@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Upload, X, Plus, Trash2, Loader2 } from 'lucide-react';
+import { ArrowLeft, Upload, X, Plus, Loader2, Image as ImageIcon, MapPin, Home, IndianRupee, FileText, Link2, Sparkles, ToggleLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { propertiesAPI, typesAPI, locationsAPI } from '@/lib/api';
@@ -61,23 +59,17 @@ const PropertyForm = () => {
     try {
       setIsLoadingData(true);
       
-      // Fetch property types
       const typesData = await typesAPI.getAll();
       const typeNames = typesData.map((t: any) => t.name);
       setPropertyTypes(typeNames);
       
-      // Fetch locations (cities and areas)
       const locationsData = await locationsAPI.getAll();
-      
-      // Extract unique cities
       const uniqueCities = [...new Set(locationsData.map((l: any) => l.city))] as string[];
       setCities(uniqueCities);
       
-      // Extract all areas
       const allAreas = locationsData.map((l: any) => l.name);
       setAreas(allAreas);
       
-      // Set default values if available
       if (typeNames.length > 0 && !formData.type) {
         setFormData(prev => ({ ...prev, type: typeNames[0] }));
       }
@@ -91,7 +83,6 @@ const PropertyForm = () => {
         description: "Could not load property types and locations. Using defaults.",
         variant: "destructive",
       });
-      // Fallback to defaults
       setPropertyTypes(['Apartment', 'Villa', 'Plot', 'Commercial']);
       setCities(['Hyderabad']);
       setAreas(['Gachibowli', 'Hitech City', 'Kondapur', 'Jubilee Hills', 'Banjara Hills']);
@@ -150,8 +141,6 @@ const PropertyForm = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      // In production, you would upload to your server and get URLs back
-      // For demo, we're using placeholder URLs
       Array.from(files).forEach(file => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -194,7 +183,6 @@ const PropertyForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Validate
     if (!formData.title || !formData.area || !formData.price) {
       toast({
         title: "Validation Error",
@@ -254,10 +242,10 @@ const PropertyForm = () => {
 
   if (isLoading || isLoadingData) {
     return (
-      <div className="max-w-4xl mx-auto flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-          <p className="text-muted-foreground text-sm">Loading {isLoading ? 'property' : 'form data'}...</p>
+          <p className="text-sm text-gray-500">Loading {isLoading ? 'property' : 'form data'}...</p>
         </div>
       </div>
     );
@@ -267,348 +255,428 @@ const PropertyForm = () => {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-lg hover:bg-secondary">
-          <ArrowLeft className="h-5 w-5" />
+        <button 
+          onClick={() => navigate(-1)} 
+          className="p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5 text-gray-600" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold">{isEditMode ? 'Edit Property' : 'Add New Property'}</h1>
-          <p className="text-muted-foreground">Fill in the details below</p>
+          <h1 className="text-2xl font-bold text-gray-800">{isEditMode ? 'Edit Property' : 'Add New Property'}</h1>
+          <p className="text-gray-500 text-sm">Fill in the details below</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Info */}
-        <div className="bg-card rounded-2xl p-6 card-shadow space-y-5">
-          <h2 className="text-lg font-semibold">Basic Information</h2>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Home className="h-5 w-5 text-blue-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-800">Basic Information</h2>
+            </div>
+          </div>
           
-          <div>
-            <label className="text-sm font-medium mb-2 block">Property Title *</label>
-            <Input
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="e.g., Luxury 3 BHK Apartment in Gachibowli"
-              className="rounded-xl"
-              required
-            />
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="p-6 space-y-5">
             <div>
-              <label className="text-sm font-medium mb-2 block">Property Type *</label>
-              <select
-                name="type"
-                value={formData.type}
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Property Title *</label>
+              <input
+                name="title"
+                value={formData.title}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card"
+                placeholder="e.g., Luxury 3 BHK Apartment in Gachibowli"
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                required
+              />
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Property Type *</label>
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                >
+                  {propertyTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">City *</label>
+                <select
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                >
+                  {cities.map(city => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Area / Locality *</label>
+              <select
+                name="area"
+                value={formData.area}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                required
               >
-                {propertyTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                <option value="">Select Area</option>
+                {areas.map(area => (
+                  <option key={area} value={area}>{area}</option>
                 ))}
               </select>
             </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">City *</label>
-              <select
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card"
-              >
-                {cities.map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-2 block">Area / Locality *</label>
-            <select
-              name="area"
-              value={formData.area}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-border bg-card"
-              required
-            >
-              <option value="">Select Area</option>
-              {areas.map(area => (
-                <option key={area} value={area}>{area}</option>
-              ))}
-            </select>
           </div>
         </div>
 
         {/* Pricing & Details */}
-        <div className="bg-card rounded-2xl p-6 card-shadow space-y-5">
-          <h2 className="text-lg font-semibold">Pricing & Details</h2>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <IndianRupee className="h-5 w-5 text-green-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-800">Pricing & Details</h2>
+            </div>
+          </div>
+          
+          <div className="p-6 space-y-5">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Transaction Type *</label>
+                <select
+                  name="transactionType"
+                  value={formData.transactionType}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                  required
+                >
+                  <option value="Sale">For Sale</option>
+                  <option value="Rent">For Rent</option>
+                  <option value="Lease">Lease</option>
+                  <option value="PG">PG</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Price (₹) *</label>
+                <input
+                  name="price"
+                  type="number"
+                  value={formData.price}
+                  onChange={handleChange}
+                  placeholder="e.g., 15000000"
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                  required
+                />
+              </div>
+            </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Transaction Type *</label>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Price Unit</label>
               <select
-                name="transactionType"
-                value={formData.transactionType}
+                name="priceUnit"
+                value={formData.priceUnit}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card"
-                required
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
               >
-                <option value="Sale">Sale</option>
-                <option value="Rent">Rent</option>
-                <option value="Lease">Lease</option>
-                <option value="PG">PG</option>
+                <option value="onwards">Onwards</option>
+                <option value="negotiable">Negotiable</option>
+                <option value="all inclusive">All Inclusive</option>
+                <option value="per sqft">Per Sq.ft</option>
               </select>
             </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Price (₹) *</label>
-              <Input
-                name="price"
-                type="number"
-                value={formData.price}
-                onChange={handleChange}
-                placeholder="e.g., 15000000"
-                className="rounded-xl"
-                required
-              />
-            </div>
-          </div>
 
-          <div>
-            <label className="text-sm font-medium mb-2 block">Price Unit</label>
-            <select
-              name="priceUnit"
-              value={formData.priceUnit}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-border bg-card"
-            >
-              <option value="onwards">Onwards</option>
-              <option value="negotiable">Negotiable</option>
-              <option value="all inclusive">All Inclusive</option>
-              <option value="per sqft">Per Sq.ft</option>
-            </select>
-          </div>
+            <div className="grid sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Bedrooms</label>
+                <input
+                  name="bedrooms"
+                  type="number"
+                  value={formData.bedrooms}
+                  onChange={handleChange}
+                  placeholder="e.g., 3"
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Bathrooms</label>
+                <input
+                  name="bathrooms"
+                  type="number"
+                  value={formData.bathrooms}
+                  onChange={handleChange}
+                  placeholder="e.g., 3"
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Area (sq.ft)</label>
+                <input
+                  name="sqft"
+                  type="number"
+                  value={formData.sqft}
+                  onChange={handleChange}
+                  placeholder="e.g., 2100"
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                />
+              </div>
+            </div>
 
-          <div className="grid sm:grid-cols-3 gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Bedrooms</label>
-              <Input
-                name="bedrooms"
-                type="number"
-                value={formData.bedrooms}
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Description</label>
+              <textarea
+                name="description"
+                value={formData.description}
                 onChange={handleChange}
-                placeholder="e.g., 3"
-                className="rounded-xl"
+                placeholder="Describe the property in detail..."
+                rows={5}
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm resize-none"
               />
             </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Bathrooms</label>
-              <Input
-                name="bathrooms"
-                type="number"
-                value={formData.bathrooms}
-                onChange={handleChange}
-                placeholder="e.g., 3"
-                className="rounded-xl"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Area (sq.ft)</label>
-              <Input
-                name="sqft"
-                type="number"
-                value={formData.sqft}
-                onChange={handleChange}
-                placeholder="e.g., 2100"
-                className="rounded-xl"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-2 block">Description</label>
-            <Textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Describe the property in detail..."
-              rows={5}
-              className="rounded-xl resize-none"
-            />
           </div>
         </div>
 
         {/* Images */}
-        <div className="bg-card rounded-2xl p-6 card-shadow space-y-5">
-          <h2 className="text-lg font-semibold">Property Images</h2>
-          
-          <div className="border-2 border-dashed border-border rounded-xl p-8 text-center">
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageUpload}
-              className="hidden"
-              id="image-upload"
-            />
-            <label htmlFor="image-upload" className="cursor-pointer">
-              <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-              <p className="font-medium">Click to upload images</p>
-              <p className="text-sm text-muted-foreground">JPG, PNG up to 1MB each</p>
-            </label>
-          </div>
-
-          {images.length > 0 && (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-              {images.map((image, index) => (
-                <div key={index} className="relative aspect-video rounded-lg overflow-hidden group">
-                  <img src={image} alt="" className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                  {index === 0 && (
-                    <span className="absolute bottom-1 left-1 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">
-                      Cover
-                    </span>
-                  )}
-                </div>
-              ))}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <ImageIcon className="h-5 w-5 text-purple-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-800">Property Images</h2>
             </div>
-          )}
+          </div>
+          
+          <div className="p-6 space-y-5">
+            <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-primary/50 hover:bg-gray-50 transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                className="hidden"
+                id="image-upload"
+              />
+              <label htmlFor="image-upload" className="cursor-pointer">
+                <div className="p-3 bg-gray-100 rounded-full w-fit mx-auto mb-3">
+                  <Upload className="h-8 w-8 text-gray-400" />
+                </div>
+                <p className="font-medium text-gray-700">Click to upload images</p>
+                <p className="text-sm text-gray-500">JPG, PNG up to 1MB each</p>
+              </label>
+            </div>
+
+            {images.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                {images.map((image, index) => (
+                  <div key={index} className="relative aspect-video rounded-lg overflow-hidden group border border-gray-200">
+                    <img src={image} alt="" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                    {index === 0 && (
+                      <span className="absolute bottom-2 left-2 text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-medium">
+                        Cover
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Brochure & Map */}
-        <div className="bg-card rounded-2xl p-6 card-shadow space-y-5">
-          <h2 className="text-lg font-semibold">Links</h2>
-          
-          <div>
-            <label className="text-sm font-medium mb-2 block">Brochure URL (Google Drive)</label>
-            <Input
-              name="brochureUrl"
-              value={formData.brochureUrl}
-              onChange={handleChange}
-              placeholder="https://drive.google.com/file/d/..."
-              className="rounded-xl"
-            />
-            <p className="text-xs text-muted-foreground mt-1">Paste your Google Drive brochure link</p>
+        {/* Links */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Link2 className="h-5 w-5 text-orange-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-800">Links</h2>
+            </div>
           </div>
+          
+          <div className="p-6 space-y-5">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Brochure URL (Google Drive)</label>
+              <input
+                name="brochureUrl"
+                value={formData.brochureUrl}
+                onChange={handleChange}
+                placeholder="https://drive.google.com/file/d/..."
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-1">Paste your Google Drive brochure link</p>
+            </div>
 
-          <div>
-            <label className="text-sm font-medium mb-2 block">Google Maps Embed URL</label>
-            <Input
-              name="mapUrl"
-              value={formData.mapUrl}
-              onChange={handleChange}
-              placeholder="https://www.google.com/maps/embed?pb=..."
-              className="rounded-xl"
-            />
-            <p className="text-xs text-muted-foreground mt-1">Get embed URL from Google Maps → Share → Embed</p>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Google Maps Embed URL</label>
+              <input
+                name="mapUrl"
+                value={formData.mapUrl}
+                onChange={handleChange}
+                placeholder="https://www.google.com/maps/embed?pb=..."
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-1">Get embed URL from Google Maps → Share → Embed</p>
+            </div>
           </div>
         </div>
 
         {/* Amenities */}
-        <div className="bg-card rounded-2xl p-6 card-shadow space-y-5">
-          <h2 className="text-lg font-semibold">Amenities</h2>
-          
-          <div className="flex gap-2">
-            <Input
-              value={newAmenity}
-              onChange={(e) => setNewAmenity(e.target.value)}
-              placeholder="e.g., Swimming Pool"
-              className="rounded-xl"
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addAmenity())}
-            />
-            <Button type="button" onClick={addAmenity} variant="outline">
-              <Plus className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {formData.amenities.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {formData.amenities.map((amenity, index) => (
-                <span key={index} className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary rounded-full text-sm">
-                  {amenity}
-                  <button type="button" onClick={() => removeAmenity(index)} className="hover:text-destructive">
-                    <X className="h-4 w-4" />
-                  </button>
-                </span>
-              ))}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-teal-100 rounded-lg">
+                <Sparkles className="h-5 w-5 text-teal-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-800">Amenities</h2>
             </div>
-          )}
+          </div>
+          
+          <div className="p-6 space-y-4">
+            <div className="flex gap-2">
+              <input
+                value={newAmenity}
+                onChange={(e) => setNewAmenity(e.target.value)}
+                placeholder="e.g., Swimming Pool"
+                className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addAmenity())}
+              />
+              <Button type="button" onClick={addAmenity} variant="outline" className="border-gray-200">
+                <Plus className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {formData.amenities.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {formData.amenities.map((amenity, index) => (
+                  <span key={index} className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 border border-teal-200 text-teal-700 rounded-full text-sm">
+                    {amenity}
+                    <button type="button" onClick={() => removeAmenity(index)} className="hover:text-red-500 transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Highlights */}
-        <div className="bg-card rounded-2xl p-6 card-shadow space-y-5">
-          <h2 className="text-lg font-semibold">Highlights</h2>
-          
-          <div className="flex gap-2">
-            <Input
-              value={newHighlight}
-              onChange={(e) => setNewHighlight(e.target.value)}
-              placeholder="e.g., Ready to Move"
-              className="rounded-xl"
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addHighlight())}
-            />
-            <Button type="button" onClick={addHighlight} variant="outline">
-              <Plus className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {formData.highlights.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {formData.highlights.map((highlight, index) => (
-                <span key={index} className="flex items-center gap-1.5 px-3 py-1.5 bg-price-light text-price rounded-full text-sm">
-                  {highlight}
-                  <button type="button" onClick={() => removeHighlight(index)} className="hover:text-destructive">
-                    <X className="h-4 w-4" />
-                  </button>
-                </span>
-              ))}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-100 rounded-lg">
+                <FileText className="h-5 w-5 text-amber-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-800">Highlights</h2>
             </div>
-          )}
+          </div>
+          
+          <div className="p-6 space-y-4">
+            <div className="flex gap-2">
+              <input
+                value={newHighlight}
+                onChange={(e) => setNewHighlight(e.target.value)}
+                placeholder="e.g., Ready to Move"
+                className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addHighlight())}
+              />
+              <Button type="button" onClick={addHighlight} variant="outline" className="border-gray-200">
+                <Plus className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {formData.highlights.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {formData.highlights.map((highlight, index) => (
+                  <span key={index} className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-sm">
+                    {highlight}
+                    <button type="button" onClick={() => removeHighlight(index)} className="hover:text-red-500 transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Settings */}
-        <div className="bg-card rounded-2xl p-6 card-shadow space-y-5">
-          <h2 className="text-lg font-semibold">Settings</h2>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Mark as Featured</p>
-              <p className="text-sm text-muted-foreground">Show in featured section on homepage</p>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gray-100 rounded-lg">
+                <ToggleLeft className="h-5 w-5 text-gray-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-800">Settings</h2>
             </div>
-            <Switch
-              checked={formData.isFeatured}
-              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFeatured: checked }))}
-            />
           </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Active Listing</p>
-              <p className="text-sm text-muted-foreground">Property visible on website</p>
+          
+          <div className="p-6 space-y-4">
+            <div className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-xl">
+              <div>
+                <p className="font-medium text-gray-800">Mark as Featured</p>
+                <p className="text-sm text-gray-500">Show in featured section on homepage</p>
+              </div>
+              <Switch
+                checked={formData.isFeatured}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFeatured: checked }))}
+              />
             </div>
-            <Switch
-              checked={formData.isActive}
-              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
-            />
+
+            <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-xl">
+              <div>
+                <p className="font-medium text-gray-800">Active Listing</p>
+                <p className="text-sm text-gray-500">Property visible on website</p>
+              </div>
+              <Switch
+                checked={formData.isActive}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
+              />
+            </div>
           </div>
         </div>
 
         {/* Submit */}
         <div className="flex gap-3 justify-end">
-          <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="border-gray-200"
+          >
             Cancel
           </Button>
           <Button 
             type="submit" 
-            className="accent-gradient text-accent-foreground font-semibold px-8"
+            className="bg-teal-500 hover:bg-teal-600 text-white shadow-lg shadow-teal-500/30 px-8"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Saving...' : isEditMode ? 'Update Property' : 'Add Property'}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              isEditMode ? 'Update Property' : 'Add Property'
+            )}
           </Button>
         </div>
       </form>
