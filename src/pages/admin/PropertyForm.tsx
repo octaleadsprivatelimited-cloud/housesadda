@@ -533,15 +533,20 @@ const PropertyForm = () => {
                 name="mapUrl"
                 value={formData.mapUrl}
                 onChange={handleChange}
-                placeholder="https://www.google.com/maps/place/... or paste any Google Maps link"
+                placeholder="https://www.google.com/maps/embed?pb=... (for embedded preview)"
                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Go to Google Maps → Search your exact location → Click Share → Copy link
-              </p>
-              <p className="text-xs text-green-600 mt-1">
-                ✅ Supports: google.com/maps/place/..., maps.google.com/?q=..., or any Google Maps URL
-              </p>
+              <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-xs font-medium text-blue-800 mb-1">📍 For embedded map preview:</p>
+                <ol className="text-xs text-blue-700 list-decimal list-inside space-y-0.5">
+                  <li>Go to Google Maps and search your exact location</li>
+                  <li>Click <strong>Share</strong> → <strong>Embed a map</strong></li>
+                  <li>Click "COPY HTML" and paste the <strong>src="..."</strong> URL only</li>
+                </ol>
+                <p className="text-xs text-blue-600 mt-2">
+                  💡 Or paste any Google Maps link - it will show as a clickable button
+                </p>
+              </div>
             </div>
 
             <div>

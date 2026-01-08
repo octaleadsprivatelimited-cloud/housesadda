@@ -212,48 +212,14 @@ const PropertyDetail = () => {
   const getGoogleMapsEmbedUrl = (url: string) => {
     if (!url) return null;
     
-    // Already an embed URL
+    // Already an embed URL - use as is
     if (url.includes('google.com/maps/embed')) {
       return url;
     }
     
-    // Extract place/location from various Google Maps URL formats
-    // Format: https://www.google.com/maps/place/PLACE_NAME/@LAT,LNG,ZOOM
-    const placeMatch = url.match(/google\.com\/maps\/place\/([^/@]+)/);
-    if (placeMatch) {
-      const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
-      return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(placeName)}`;
-    }
-    
-    // Format: https://www.google.com/maps/@LAT,LNG,ZOOM
-    const coordMatch = url.match(/google\.com\/maps\/@(-?\d+\.?\d*),(-?\d+\.?\d*),(\d+\.?\d*)z/);
-    if (coordMatch) {
-      const lat = coordMatch[1];
-      const lng = coordMatch[2];
-      return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d5000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1`;
-    }
-    
-    // Format: https://maps.google.com/?q=LAT,LNG or place name
-    const qMatch = url.match(/[?&]q=([^&]+)/);
-    if (qMatch) {
-      const query = decodeURIComponent(qMatch[1]);
-      return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(query)}`;
-    }
-    
-    // Format: Short URL https://goo.gl/maps/XXX or maps.app.goo.gl
-    if (url.includes('goo.gl/maps') || url.includes('maps.app.goo.gl')) {
-      // Can't convert short URLs directly, return null to show fallback
-      return null;
-    }
-    
-    // If URL contains coordinates like "17.4234,78.4567"
-    const rawCoordMatch = url.match(/(-?\d+\.?\d*),\s*(-?\d+\.?\d*)/);
-    if (rawCoordMatch) {
-      const lat = rawCoordMatch[1];
-      const lng = rawCoordMatch[2];
-      return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d5000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1`;
-    }
-    
+    // For any other Google Maps URL, we can't reliably convert it
+    // Return null to show the fallback with "Open in Google Maps" button
+    // This ensures the user always sees the correct location via the link
     return null;
   };
 
