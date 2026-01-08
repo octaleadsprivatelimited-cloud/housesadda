@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Building2, Home, Map, Store, Loader2 } from 'lucide-react';
+import { Building2, Home, Map, Store, Loader2, Trees, Wheat, Users, Building } from 'lucide-react';
 import { typesAPI, propertiesAPI } from '@/lib/api';
 
 // Icon and color mapping for property types
 const typeStyles: Record<string, { icon: any; color: string; description: string }> = {
   'Apartment': { icon: Building2, color: 'from-blue-500 to-blue-600', description: '1, 2, 3, 4 BHK Flats' },
   'Apartments': { icon: Building2, color: 'from-blue-500 to-blue-600', description: '1, 2, 3, 4 BHK Flats' },
+  'Flat': { icon: Building, color: 'from-indigo-500 to-indigo-600', description: '1, 2, 3, 4 BHK Flats' },
+  'Flats': { icon: Building, color: 'from-indigo-500 to-indigo-600', description: '1, 2, 3, 4 BHK Flats' },
   'Villa': { icon: Home, color: 'from-emerald-500 to-emerald-600', description: 'Independent Houses' },
   'Villas': { icon: Home, color: 'from-emerald-500 to-emerald-600', description: 'Independent Houses' },
   'Plot': { icon: Map, color: 'from-amber-500 to-amber-600', description: 'HMDA Approved Lands' },
   'Plots': { icon: Map, color: 'from-amber-500 to-amber-600', description: 'HMDA Approved Lands' },
   'Commercial': { icon: Store, color: 'from-purple-500 to-purple-600', description: 'Office & Retail Spaces' },
+  'Farm House': { icon: Trees, color: 'from-green-500 to-green-600', description: 'Farm Houses & Retreats' },
+  'Farm Land': { icon: Wheat, color: 'from-lime-500 to-lime-600', description: 'Agricultural Lands' },
+  'PG': { icon: Users, color: 'from-pink-500 to-pink-600', description: 'Paying Guest Accommodations' },
   'default': { icon: Building2, color: 'from-gray-500 to-gray-600', description: 'Properties' },
 };
 

@@ -1,6 +1,7 @@
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { HeroSection } from '@/components/HeroSection';
+import { FeaturedPropertiesTabs } from '@/components/FeaturedPropertiesTabs';
 import { CategoryCards } from '@/components/CategoryCards';
 import { FeaturedProperties } from '@/components/FeaturedProperties';
 import { LatestProperties } from '@/components/LatestProperties';
@@ -15,6 +16,7 @@ const Index = () => {
       
       <main className="flex-1 pb-20 md:pb-0">
         <HeroSection />
+        <FeaturedPropertiesTabs />
         <CategoryCards />
         <FeaturedProperties />
         <BrowseByLocality />
