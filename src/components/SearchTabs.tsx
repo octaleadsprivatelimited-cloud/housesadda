@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Home, IndianRupee, ChevronDown } from 'lucide-react';
+import { Search, MapPin, Home, IndianRupee, ChevronDown, Check } from 'lucide-react';
 import { typesAPI, locationsAPI } from '@/lib/api';
 
 const budgetRanges = [
@@ -21,10 +21,81 @@ const transactionTypes = [
   { label: 'PG', value: 'PG' },
 ];
 
+// Custom Dropdown Component
+interface DropdownProps {
+  label: string;
+  icon: React.ReactNode;
+  value: string;
+  options: { label: string; value: string }[];
+  onChange: (value: string) => void;
+  placeholder?: string;
+}
+
+function CustomDropdown({ label, icon, value, options, onChange, placeholder = 'Select' }: DropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={dropdownRef} className="relative flex-1">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all ${
+          isOpen 
+            ? 'border-primary bg-primary/5' 
+            : 'border-gray-100 hover:border-gray-200 bg-white'
+        }`}
+      >
+        <span className={`${isOpen ? 'text-primary' : 'text-gray-400'}`}>{icon}</span>
+        <div className="flex-1 text-left">
+          <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">{label}</p>
+          <p className={`text-sm font-medium truncate ${selectedOption?.label ? 'text-gray-800' : 'text-gray-400'}`}>
+            {selectedOption?.label || placeholder}
+          </p>
+        </div>
+        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => {
+                onChange(option.value);
+                setIsOpen(false);
+              }}
+              className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-gray-50 transition-colors ${
+                value === option.value ? 'bg-primary/5 text-primary' : 'text-gray-700'
+              }`}
+            >
+              <span className="text-sm font-medium">{option.label}</span>
+              {value === option.value && <Check className="h-4 w-4 text-primary" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function SearchTabs() {
   const navigate = useNavigate();
-  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
-  const [areas, setAreas] = useState<string[]>([]);
+  const [propertyTypes, setPropertyTypes] = useState<{ label: string; value: string }[]>([]);
+  const [areas, setAreas] = useState<{ label: string; value: string }[]>([]);
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedBudget, setSelectedBudget] = useState('');
@@ -39,16 +110,31 @@ export function SearchTabs() {
     try {
       setIsLoading(true);
       const types = await typesAPI.getAll();
-      const typeNames = types.map((t: any) => t.name);
-      setPropertyTypes(typeNames);
+      const typeOptions = [
+        { label: 'All Types', value: '' },
+        ...types.map((t: any) => ({ label: t.name, value: t.name }))
+      ];
+      setPropertyTypes(typeOptions);
       
       const locations = await locationsAPI.getAll();
-      const areaNames = locations.map((l: any) => l.name);
-      setAreas(areaNames);
+      const areaOptions = [
+        { label: 'All Areas', value: '' },
+        ...locations.map((l: any) => ({ label: l.name, value: l.name }))
+      ];
+      setAreas(areaOptions);
     } catch (error) {
       console.error('Error loading data:', error);
-      setPropertyTypes(['Apartment', 'Villa', 'Plot', 'Commercial']);
-      setAreas(['Gachibowli', 'Hitech City', 'Kondapur', 'Madhapur']);
+      setPropertyTypes([
+        { label: 'All Types', value: '' },
+        { label: 'Apartment', value: 'Apartment' },
+        { label: 'Villa', value: 'Villa' },
+        { label: 'Plot', value: 'Plot' },
+      ]);
+      setAreas([
+        { label: 'All Areas', value: '' },
+        { label: 'Gachibowli', value: 'Gachibowli' },
+        { label: 'Hitech City', value: 'Hitech City' },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -67,17 +153,9 @@ export function SearchTabs() {
       }
     }
     
-    if (selectedArea) {
-      params.set('search', selectedArea);
-    }
-    
-    if (selectedType) {
-      params.set('type', selectedType);
-    }
-    
-    if (selectedBudget) {
-      params.set('budget', selectedBudget);
-    }
+    if (selectedArea) params.set('search', selectedArea);
+    if (selectedType) params.set('type', selectedType);
+    if (selectedBudget) params.set('budget', selectedBudget);
     
     navigate(`/properties?${params.toString()}`);
   };
@@ -85,16 +163,16 @@ export function SearchTabs() {
   return (
     <div className="w-full max-w-5xl mx-auto px-4">
       {/* Transaction Type Tabs */}
-      <div className="flex justify-center mb-4">
-        <div className="inline-flex bg-white rounded-full p-1 shadow-md">
+      <div className="flex justify-center mb-5">
+        <div className="inline-flex bg-white/80 backdrop-blur rounded-full p-1.5 shadow-lg border border-gray-100">
           {transactionTypes.map((type) => (
             <button
               key={type.value}
               onClick={() => setSelectedTransaction(type.value)}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
                 selectedTransaction === type.value
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
               }`}
             >
               {type.label}
@@ -104,103 +182,63 @@ export function SearchTabs() {
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white rounded-2xl shadow-xl p-3 md:p-4">
-        <div className="flex flex-col md:flex-row gap-3">
+      <div className="bg-white rounded-2xl shadow-2xl shadow-gray-200/50 p-4 md:p-5 border border-gray-100">
+        <div className="flex flex-col lg:flex-row gap-3">
           {/* Area Dropdown */}
-          <div className="flex-1 relative group">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-gray-100 hover:border-primary/30 focus-within:border-primary transition-colors bg-gray-50/50">
-              <MapPin className="h-5 w-5 text-primary" />
-              <div className="flex-1">
-                <label className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Location</label>
-                <div className="relative">
-                  <select
-                    value={selectedArea}
-                    onChange={(e) => setSelectedArea(e.target.value)}
-                    className="w-full text-gray-800 font-medium bg-transparent outline-none cursor-pointer appearance-none pr-6"
-                    disabled={isLoading}
-                  >
-                    <option value="">Select Area</option>
-                    {areas.map((area) => (
-                      <option key={area} value={area}>{area}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-          </div>
+          <CustomDropdown
+            label="Location"
+            icon={<MapPin className="h-5 w-5" />}
+            value={selectedArea}
+            options={areas}
+            onChange={setSelectedArea}
+            placeholder="Select Area"
+          />
 
           {/* Property Type Dropdown */}
-          <div className="flex-1 relative">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-gray-100 hover:border-primary/30 focus-within:border-primary transition-colors bg-gray-50/50">
-              <Home className="h-5 w-5 text-gray-400" />
-              <div className="flex-1">
-                <label className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Property Type</label>
-                <div className="relative">
-                  <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value)}
-                    className="w-full text-gray-800 font-medium bg-transparent outline-none cursor-pointer appearance-none pr-6"
-                    disabled={isLoading}
-                  >
-                    <option value="">All Types</option>
-                    {propertyTypes.map((type) => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-          </div>
+          <CustomDropdown
+            label="Property Type"
+            icon={<Home className="h-5 w-5" />}
+            value={selectedType}
+            options={propertyTypes}
+            onChange={setSelectedType}
+            placeholder="Select Type"
+          />
 
           {/* Budget Dropdown */}
-          <div className="flex-1 relative">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-gray-100 hover:border-primary/30 focus-within:border-primary transition-colors bg-gray-50/50">
-              <IndianRupee className="h-5 w-5 text-gray-400" />
-              <div className="flex-1">
-                <label className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Budget</label>
-                <div className="relative">
-                  <select
-                    value={selectedBudget}
-                    onChange={(e) => setSelectedBudget(e.target.value)}
-                    className="w-full text-gray-800 font-medium bg-transparent outline-none cursor-pointer appearance-none pr-6"
-                  >
-                    {budgetRanges.map((budget) => (
-                      <option key={budget.value} value={budget.value}>{budget.label}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-          </div>
+          <CustomDropdown
+            label="Budget"
+            icon={<IndianRupee className="h-5 w-5" />}
+            value={selectedBudget}
+            options={budgetRanges}
+            onChange={setSelectedBudget}
+            placeholder="Any Budget"
+          />
 
           {/* Search Button */}
           <button 
             onClick={handleSearch}
-            className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-8 rounded-xl transition-all hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98]"
+            className="flex items-center justify-center gap-2.5 bg-gradient-to-r from-primary to-red-500 hover:from-primary/90 hover:to-red-500/90 text-white font-semibold py-4 px-10 rounded-xl transition-all hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98] min-w-[140px]"
           >
             <Search className="h-5 w-5" />
-            <span className="hidden sm:inline">Search</span>
+            <span>Search</span>
           </button>
         </div>
       </div>
 
       {/* Popular Searches */}
-      {areas.length > 0 && (
-        <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
-          <span className="text-sm text-gray-400">Popular:</span>
-          {areas.slice(0, 5).map((area) => (
+      {areas.length > 1 && (
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
+          <span className="text-sm text-gray-400 font-medium">Popular:</span>
+          {areas.slice(1, 6).map((area) => (
             <button
-              key={area}
+              key={area.value}
               onClick={() => {
-                setSelectedArea(area);
+                setSelectedArea(area.value);
                 setTimeout(handleSearch, 100);
               }}
-              className="px-3 py-1 text-sm text-gray-500 hover:text-primary hover:bg-primary/5 rounded-full transition-colors"
+              className="px-4 py-1.5 text-sm text-gray-500 hover:text-white hover:bg-primary bg-white/80 backdrop-blur border border-gray-200 hover:border-primary rounded-full transition-all shadow-sm"
             >
-              {area}
+              {area.label}
             </button>
           ))}
         </div>
