@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Home, IndianRupee, Tag } from 'lucide-react';
+import { Search, MapPin, Home, IndianRupee, ChevronDown } from 'lucide-react';
 import { typesAPI, locationsAPI } from '@/lib/api';
 
 const budgetRanges = [
@@ -15,7 +15,7 @@ const budgetRanges = [
 ];
 
 const transactionTypes = [
-  { label: 'Buy (Sale)', value: 'Sale' },
+  { label: 'Buy', value: 'Sale' },
   { label: 'Rent', value: 'Rent' },
   { label: 'Lease', value: 'Lease' },
   { label: 'PG', value: 'PG' },
@@ -38,17 +38,13 @@ export function SearchTabs() {
   const loadData = async () => {
     try {
       setIsLoading(true);
-      
-      // Load property types
       const types = await typesAPI.getAll();
       const typeNames = types.map((t: any) => t.name);
       setPropertyTypes(typeNames);
       
-      // Load locations/areas
       const locations = await locationsAPI.getAll();
       const areaNames = locations.map((l: any) => l.name);
       setAreas(areaNames);
-      
     } catch (error) {
       console.error('Error loading data:', error);
       setPropertyTypes(['Apartment', 'Villa', 'Plot', 'Commercial']);
@@ -61,7 +57,6 @@ export function SearchTabs() {
   const handleSearch = () => {
     const params = new URLSearchParams();
     
-    // Set transaction type
     if (selectedTransaction) {
       if (selectedTransaction === 'Sale') {
         params.set('intent', 'buy');
@@ -72,129 +67,144 @@ export function SearchTabs() {
       }
     }
     
-    // Add area if selected
     if (selectedArea) {
       params.set('search', selectedArea);
     }
     
-    // Add property type if selected
     if (selectedType) {
       params.set('type', selectedType);
     }
     
-    // Add budget if selected
     if (selectedBudget) {
       params.set('budget', selectedBudget);
     }
     
-    // Navigate to properties page with filters
     navigate(`/properties?${params.toString()}`);
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-5xl mx-auto px-4">
+      {/* Transaction Type Tabs */}
+      <div className="flex justify-center mb-4">
+        <div className="inline-flex bg-white rounded-full p-1 shadow-md">
+          {transactionTypes.map((type) => (
+            <button
+              key={type.value}
+              onClick={() => setSelectedTransaction(type.value)}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                selectedTransaction === type.value
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {type.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Search Bar */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-2">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+      <div className="bg-white rounded-2xl shadow-xl p-3 md:p-4">
+        <div className="flex flex-col md:flex-row gap-3">
           {/* Area Dropdown */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
-            <MapPin className="h-5 w-5 text-primary flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] text-gray-500 uppercase font-medium">Area</p>
-              <select
-                value={selectedArea}
-                onChange={(e) => setSelectedArea(e.target.value)}
-                className="w-full text-sm font-medium text-gray-800 bg-transparent outline-none cursor-pointer appearance-none truncate"
-                disabled={isLoading}
-              >
-                <option value="">All Areas</option>
-                {areas.map((area) => (
-                  <option key={area} value={area}>{area}</option>
-                ))}
-              </select>
+          <div className="flex-1 relative group">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-gray-100 hover:border-primary/30 focus-within:border-primary transition-colors bg-gray-50/50">
+              <MapPin className="h-5 w-5 text-primary" />
+              <div className="flex-1">
+                <label className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Location</label>
+                <div className="relative">
+                  <select
+                    value={selectedArea}
+                    onChange={(e) => setSelectedArea(e.target.value)}
+                    className="w-full text-gray-800 font-medium bg-transparent outline-none cursor-pointer appearance-none pr-6"
+                    disabled={isLoading}
+                  >
+                    <option value="">Select Area</option>
+                    {areas.map((area) => (
+                      <option key={area} value={area}>{area}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Property Type Dropdown */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
-            <Home className="h-5 w-5 text-gray-400 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] text-gray-500 uppercase font-medium">Type</p>
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full text-sm font-medium text-gray-800 bg-transparent outline-none cursor-pointer appearance-none truncate"
-                disabled={isLoading}
-              >
-                <option value="">All Types</option>
-                {propertyTypes.map((type) => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
+          <div className="flex-1 relative">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-gray-100 hover:border-primary/30 focus-within:border-primary transition-colors bg-gray-50/50">
+              <Home className="h-5 w-5 text-gray-400" />
+              <div className="flex-1">
+                <label className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Property Type</label>
+                <div className="relative">
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="w-full text-gray-800 font-medium bg-transparent outline-none cursor-pointer appearance-none pr-6"
+                    disabled={isLoading}
+                  >
+                    <option value="">All Types</option>
+                    {propertyTypes.map((type) => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Budget Dropdown */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
-            <IndianRupee className="h-5 w-5 text-gray-400 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] text-gray-500 uppercase font-medium">Budget</p>
-              <select
-                value={selectedBudget}
-                onChange={(e) => setSelectedBudget(e.target.value)}
-                className="w-full text-sm font-medium text-gray-800 bg-transparent outline-none cursor-pointer appearance-none truncate"
-              >
-                {budgetRanges.map((budget) => (
-                  <option key={budget.value} value={budget.value}>{budget.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Transaction Type Dropdown */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
-            <Tag className="h-5 w-5 text-gray-400 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] text-gray-500 uppercase font-medium">For</p>
-              <select
-                value={selectedTransaction}
-                onChange={(e) => setSelectedTransaction(e.target.value)}
-                className="w-full text-sm font-medium text-gray-800 bg-transparent outline-none cursor-pointer appearance-none truncate"
-              >
-                {transactionTypes.map((type) => (
-                  <option key={type.value} value={type.value}>{type.label}</option>
-                ))}
-              </select>
+          <div className="flex-1 relative">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-gray-100 hover:border-primary/30 focus-within:border-primary transition-colors bg-gray-50/50">
+              <IndianRupee className="h-5 w-5 text-gray-400" />
+              <div className="flex-1">
+                <label className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Budget</label>
+                <div className="relative">
+                  <select
+                    value={selectedBudget}
+                    onChange={(e) => setSelectedBudget(e.target.value)}
+                    className="w-full text-gray-800 font-medium bg-transparent outline-none cursor-pointer appearance-none pr-6"
+                  >
+                    {budgetRanges.map((budget) => (
+                      <option key={budget.value} value={budget.value}>{budget.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Search Button */}
           <button 
             onClick={handleSearch}
-            className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-8 rounded-xl transition-all hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98]"
           >
             <Search className="h-5 w-5" />
-            <span>Search</span>
+            <span className="hidden sm:inline">Search</span>
           </button>
         </div>
       </div>
 
-      {/* Quick Links */}
-      <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
-        <span className="text-sm text-gray-500">Popular:</span>
-        {areas.slice(0, 5).map((area) => (
-          <button
-            key={area}
-            onClick={() => {
-              setSelectedArea(area);
-              handleSearch();
-            }}
-            className="text-sm text-gray-600 hover:text-primary transition-colors"
-          >
-            {area}
-          </button>
-        ))}
-      </div>
+      {/* Popular Searches */}
+      {areas.length > 0 && (
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
+          <span className="text-sm text-gray-400">Popular:</span>
+          {areas.slice(0, 5).map((area) => (
+            <button
+              key={area}
+              onClick={() => {
+                setSelectedArea(area);
+                setTimeout(handleSearch, 100);
+              }}
+              className="px-3 py-1 text-sm text-gray-500 hover:text-primary hover:bg-primary/5 rounded-full transition-colors"
+            >
+              {area}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
