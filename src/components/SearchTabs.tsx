@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Home, IndianRupee } from 'lucide-react';
 import { typesAPI } from '@/lib/api';
 
@@ -9,10 +10,12 @@ interface SearchTabsProps {
 }
 
 export function SearchTabs({ activeTab = 'buy' }: SearchTabsProps) {
+  const navigate = useNavigate();
   const [currentTab, setCurrentTab] = useState(activeTab);
   const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState('');
   const [selectedBudget, setSelectedBudget] = useState('Budget');
+  const [searchLocation, setSearchLocation] = useState('');
 
   useEffect(() => {
     loadPropertyTypes();
@@ -31,6 +34,34 @@ export function SearchTabs({ activeTab = 'buy' }: SearchTabsProps) {
       setPropertyTypes(['Apartment', 'Villa', 'Plot', 'Commercial']);
       setSelectedType('Apartment');
     }
+  };
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    
+    // Set intent based on current tab
+    if (currentTab === 'buy') {
+      params.set('intent', 'buy');
+    } else if (currentTab === 'rent') {
+      params.set('intent', 'rent');
+    } else if (currentTab === 'pg') {
+      params.set('intent', 'pg');
+    } else if (currentTab === 'new' || currentTab === 'plot' || currentTab === 'commercial') {
+      params.set('type', currentTab);
+    }
+    
+    // Add property type if selected
+    if (selectedType) {
+      params.set('type', selectedType);
+    }
+    
+    // Add search location if entered
+    if (searchLocation.trim()) {
+      params.set('search', searchLocation.trim());
+    }
+    
+    // Navigate to properties page with filters
+    navigate(`/properties?${params.toString()}`);
   };
 
   const tabs = [
@@ -82,6 +113,9 @@ export function SearchTabs({ activeTab = 'buy' }: SearchTabsProps) {
         <div className="flex-1 px-4 py-2">
           <input
             type="text"
+            value={searchLocation}
+            onChange={(e) => setSearchLocation(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             placeholder="Add more... Locality, Area, Project"
             className="mb-search-input w-full"
           />
@@ -120,7 +154,10 @@ export function SearchTabs({ activeTab = 'buy' }: SearchTabsProps) {
         </div>
 
         {/* Search Button */}
-        <button className="mb-search-btn flex items-center gap-2">
+        <button 
+          onClick={handleSearch}
+          className="mb-search-btn flex items-center gap-2"
+        >
           <Search className="h-5 w-5" />
           Search
         </button>

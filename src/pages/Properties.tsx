@@ -29,6 +29,7 @@ const Properties = () => {
   // Get filters from URL params
   const intent = searchParams.get('intent') || '';
   const typeParam = searchParams.get('type') || '';
+  const searchQuery = searchParams.get('search') || '';
   
   const budgetRanges = [
     { label: 'Any Budget', min: 0, max: Infinity },
@@ -46,7 +47,7 @@ const Properties = () => {
   useEffect(() => {
     loadProperties();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [intent, typeParam, selectedArea, selectedType]);
+  }, [intent, typeParam, selectedArea, selectedType, searchQuery]);
 
   const loadProperties = async () => {
     try {
@@ -58,10 +59,17 @@ const Properties = () => {
         params.transactionType = 'Sale';
       } else if (intent === 'rent') {
         params.transactionType = 'Rent';
+      } else if (intent === 'pg') {
+        params.transactionType = 'PG';
       }
       
       if (typeParam) {
         params.type = typeParam;
+      }
+      
+      // Add search query if present
+      if (searchQuery) {
+        params.search = searchQuery;
       }
       
       const data = await propertiesAPI.getAll(params);
@@ -128,7 +136,19 @@ const Properties = () => {
     const areaMatch = selectedArea === 'All Areas' || property.area === selectedArea;
     const typeMatch = selectedType === 'All Types' || property.type === selectedType;
     const budgetMatch = property.price >= selectedBudget.min && property.price <= selectedBudget.max;
-    return areaMatch && typeMatch && budgetMatch;
+    
+    // Local search filter for area names (in case backend search didn't match)
+    let searchMatch = true;
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      searchMatch = 
+        property.title.toLowerCase().includes(query) ||
+        property.area?.toLowerCase().includes(query) ||
+        property.city?.toLowerCase().includes(query) ||
+        property.type?.toLowerCase().includes(query);
+    }
+    
+    return areaMatch && typeMatch && budgetMatch && searchMatch;
   });
 
   const clearFilters = () => {
@@ -147,9 +167,14 @@ const Properties = () => {
         {/* Page Header */}
         <section className="hero-gradient text-primary-foreground py-12 md:py-16">
           <div className="container">
-            <h1 className="text-2xl md:text-4xl font-bold mb-2">All Properties</h1>
+            <h1 className="text-2xl md:text-4xl font-bold mb-2">
+              {searchQuery ? `Search: "${searchQuery}"` : 'All Properties'}
+            </h1>
             <p className="text-primary-foreground/80">
-              Discover {filteredProperties.length} properties in Hyderabad
+              {filteredProperties.length} properties found
+              {intent === 'buy' && ' for Sale'}
+              {intent === 'rent' && ' for Rent'}
+              {typeParam && ` in ${typeParam}`}
             </p>
           </div>
         </section>
