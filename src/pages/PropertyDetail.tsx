@@ -208,6 +208,55 @@ const PropertyDetail = () => {
     return null;
   };
 
+  // Helper function to convert any Google Maps URL to embed URL
+  const getGoogleMapsEmbedUrl = (url: string) => {
+    if (!url) return null;
+    
+    // Already an embed URL
+    if (url.includes('google.com/maps/embed')) {
+      return url;
+    }
+    
+    // Extract place/location from various Google Maps URL formats
+    // Format: https://www.google.com/maps/place/PLACE_NAME/@LAT,LNG,ZOOM
+    const placeMatch = url.match(/google\.com\/maps\/place\/([^/@]+)/);
+    if (placeMatch) {
+      const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
+      return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(placeName)}`;
+    }
+    
+    // Format: https://www.google.com/maps/@LAT,LNG,ZOOM
+    const coordMatch = url.match(/google\.com\/maps\/@(-?\d+\.?\d*),(-?\d+\.?\d*),(\d+\.?\d*)z/);
+    if (coordMatch) {
+      const lat = coordMatch[1];
+      const lng = coordMatch[2];
+      return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d5000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1`;
+    }
+    
+    // Format: https://maps.google.com/?q=LAT,LNG or place name
+    const qMatch = url.match(/[?&]q=([^&]+)/);
+    if (qMatch) {
+      const query = decodeURIComponent(qMatch[1]);
+      return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(query)}`;
+    }
+    
+    // Format: Short URL https://goo.gl/maps/XXX or maps.app.goo.gl
+    if (url.includes('goo.gl/maps') || url.includes('maps.app.goo.gl')) {
+      // Can't convert short URLs directly, return null to show fallback
+      return null;
+    }
+    
+    // If URL contains coordinates like "17.4234,78.4567"
+    const rawCoordMatch = url.match(/(-?\d+\.?\d*),\s*(-?\d+\.?\d*)/);
+    if (rawCoordMatch) {
+      const lat = rawCoordMatch[1];
+      const lng = rawCoordMatch[2];
+      return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d5000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1`;
+    }
+    
+    return null;
+  };
+
   const propertyData = {
     id: property.id,
     title: property.title,
@@ -230,7 +279,7 @@ const PropertyDetail = () => {
     description: property.description || 'No description available.',
     amenities: property.amenities || [],
     highlights: property.highlights || [],
-    mapUrl: property.mapUrl || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30452.68657654982!2d78.34!3d17.44!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb93dc8c5d69df%3A0x19688beb557fa0ee!2sGachibowli%2C%20Hyderabad%2C%20Telangana!5e0!3m2!1sen!2sin!4v1704067200000!5m2!1sen!2sin',
+    mapUrl: property.mapUrl || '',
     postedDate: property.createdAt || new Date().toISOString().split('T')[0],
     transactionType: property.transactionType || 'Sale',
   };
@@ -516,10 +565,10 @@ const PropertyDetail = () => {
               {/* Location Map */}
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Location</h2>
-                {propertyData.mapUrl && propertyData.mapUrl.includes('google.com/maps/embed') ? (
+                {propertyData.mapUrl && getGoogleMapsEmbedUrl(propertyData.mapUrl) ? (
                   <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 mb-4">
                     <iframe
-                      src={propertyData.mapUrl}
+                      src={getGoogleMapsEmbedUrl(propertyData.mapUrl)!}
                       width="100%"
                       height="100%"
                       style={{ border: 0 }}
@@ -537,9 +586,7 @@ const PropertyDetail = () => {
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">{propertyData.area}</h3>
                     <p className="text-gray-600 mb-4">{propertyData.city}</p>
                     <a
-                      href={propertyData.mapUrl && propertyData.mapUrl.includes('google.com/maps') 
-                        ? propertyData.mapUrl 
-                        : `https://www.google.com/maps/search/${encodeURIComponent(propertyData.area + ', ' + propertyData.city)}`}
+                      href={propertyData.mapUrl || `https://www.google.com/maps/search/${encodeURIComponent(propertyData.area + ', ' + propertyData.city)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-full font-medium hover:bg-primary/90 transition-colors shadow-lg"
@@ -550,9 +597,7 @@ const PropertyDetail = () => {
                   </div>
                 )}
                 <a
-                  href={propertyData.mapUrl && propertyData.mapUrl.includes('google.com/maps') 
-                    ? propertyData.mapUrl 
-                    : `https://www.google.com/maps/search/${encodeURIComponent(propertyData.area + ', ' + propertyData.city)}`}
+                  href={propertyData.mapUrl || `https://www.google.com/maps/search/${encodeURIComponent(propertyData.area + ', ' + propertyData.city)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-primary hover:underline font-medium"

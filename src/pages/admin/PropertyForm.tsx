@@ -528,19 +528,19 @@ const PropertyForm = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Google Maps Embed URL (Optional)</label>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Google Maps Location URL</label>
               <input
                 name="mapUrl"
                 value={formData.mapUrl}
                 onChange={handleChange}
-                placeholder="https://www.google.com/maps/embed?pb=..."
+                placeholder="https://www.google.com/maps/place/... or paste any Google Maps link"
                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Go to Google Maps → Search location → Click Share → Embed a map → Copy the src URL from the iframe code
+                Go to Google Maps → Search your exact location → Click Share → Copy link
               </p>
-              <p className="text-xs text-blue-600 mt-1">
-                💡 If left empty, a "View on Google Maps" button will be shown instead
+              <p className="text-xs text-green-600 mt-1">
+                ✅ Supports: google.com/maps/place/..., maps.google.com/?q=..., or any Google Maps URL
               </p>
             </div>
 
