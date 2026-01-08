@@ -54,21 +54,29 @@ export function FeaturedProperties() {
   };
 
   return (
-    <section className="py-10 md:py-14 bg-secondary/30">
-      <div className="container">
-        <div className="mb-section-header">
+    <section className="py-12 md:py-16 bg-gradient-to-br from-primary/5 via-white to-blue-50 relative overflow-hidden">
+      {/* Decorative Elements */}
+      <div className="absolute top-20 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-20 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl" />
+      
+      <div className="container relative z-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <h2 className="mb-section-title">Popular Owner Properties</h2>
+            <span className="inline-block px-4 py-1.5 bg-amber-500/10 text-amber-600 text-sm font-semibold rounded-full mb-3">
+              ⭐ Featured
+            </span>
+            <h2 className="text-2xl md:text-4xl font-bold text-gray-900">Popular Owner Properties</h2>
+            <p className="text-gray-500 mt-2">Handpicked properties from verified owners</p>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/properties" className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
+            <Link to="/properties" className="text-primary text-sm font-semibold hover:underline flex items-center gap-1 bg-primary/10 px-4 py-2 rounded-full hover:bg-primary/20 transition-colors">
               See all Properties <ArrowRight className="h-4 w-4" />
             </Link>
-            <div className="hidden md:flex gap-1">
-              <Button variant="outline" size="icon" onClick={() => scroll('left')} className="rounded-full h-9 w-9">
+            <div className="hidden md:flex gap-2">
+              <Button variant="outline" size="icon" onClick={() => scroll('left')} className="rounded-full h-10 w-10 border-2 hover:bg-primary hover:text-white hover:border-primary transition-all">
                 <ChevronLeft className="h-5 w-5" />
               </Button>
-              <Button variant="outline" size="icon" onClick={() => scroll('right')} className="rounded-full h-9 w-9">
+              <Button variant="outline" size="icon" onClick={() => scroll('right')} className="rounded-full h-10 w-10 border-2 hover:bg-primary hover:text-white hover:border-primary transition-all">
                 <ChevronRight className="h-5 w-5" />
               </Button>
             </div>
@@ -82,16 +90,16 @@ export function FeaturedProperties() {
         ) : featuredProperties.length > 0 ? (
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 md:mx-0 md:px-0"
+            className="flex gap-5 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 md:mx-0 md:px-0"
           >
             {featuredProperties.map((property) => (
-              <div key={property.id} className="flex-shrink-0 w-[280px] md:w-[300px]">
+              <div key={property.id} className="flex-shrink-0 w-[280px] md:w-[320px]">
                 <PropertyCard property={property} />
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 text-muted-foreground">
+          <div className="text-center py-12 text-muted-foreground bg-white/50 rounded-2xl border border-dashed border-gray-200">
             No featured properties available
           </div>
         )}

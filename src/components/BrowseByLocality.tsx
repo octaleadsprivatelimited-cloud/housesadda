@@ -66,26 +66,50 @@ export function BrowseByLocality() {
   }
 
   return (
-    <section className="py-10 md:py-14 bg-secondary/30">
-      <div className="container">
-        <div className="mb-section-header">
-          <h2 className="mb-section-title">Top Localities in Hyderabad</h2>
-          <Link to="/properties" className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
+    <section className="py-12 md:py-16 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+      {/* Decorative Elements */}
+      <div className="absolute top-0 right-0 w-80 h-80 bg-green-500/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+      
+      <div className="container relative z-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+          <div>
+            <span className="inline-block px-4 py-1.5 bg-green-500/10 text-green-600 text-sm font-semibold rounded-full mb-3">
+              📍 Locations
+            </span>
+            <h2 className="text-2xl md:text-4xl font-bold text-gray-900">Top Localities in Hyderabad</h2>
+            <p className="text-gray-500 mt-2">Explore properties in popular neighborhoods</p>
+          </div>
+          <Link to="/properties" className="text-primary text-sm font-semibold hover:underline flex items-center gap-1 bg-primary/10 px-4 py-2 rounded-full hover:bg-primary/20 transition-colors w-fit">
             See all <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {localities.map((locality) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {localities.map((locality, index) => (
             <Link
               key={locality.name}
               to={`/properties?area=${encodeURIComponent(locality.name)}`}
-              className="bg-card border border-border rounded-lg p-4 hover:border-primary hover:shadow-md transition-all group"
+              className="group bg-white border-2 border-gray-100 rounded-xl p-5 hover:border-primary hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden"
             >
-              <p className="font-medium text-foreground group-hover:text-primary transition-colors">
+              {/* Rank Badge */}
+              {index < 3 && (
+                <span className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                  index === 0 ? 'bg-amber-500' : index === 1 ? 'bg-gray-400' : 'bg-amber-700'
+                }`}>
+                  {index + 1}
+                </span>
+              )}
+              <p className="font-semibold text-gray-900 group-hover:text-primary transition-colors text-lg">
                 {locality.name}
               </p>
-              <p className="text-sm text-muted-foreground">{locality.count} Properties</p>
+              <p className="text-sm text-gray-500 mt-1">{locality.count} Properties</p>
+              <div className="mt-3 h-1 bg-gray-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-primary to-red-400 rounded-full transition-all duration-500 group-hover:w-full"
+                  style={{ width: `${Math.min((locality.count / 10) * 100, 100)}%` }}
+                />
+              </div>
             </Link>
           ))}
         </div>

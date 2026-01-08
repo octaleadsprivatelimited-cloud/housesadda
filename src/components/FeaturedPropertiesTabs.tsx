@@ -46,28 +46,28 @@ function CategorySection({ category, allProperties }: CategorySectionProps) {
   };
 
   return (
-    <div className="mb-10">
+    <div className="mb-12 bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
       {/* Section Header */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-3">
-          <div className={`p-2.5 rounded-xl bg-gradient-to-br ${category.color} shadow-lg`}>
-            <Icon className="h-5 w-5 text-white" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <div className={`p-3 rounded-2xl bg-gradient-to-br ${category.color} shadow-lg shadow-${category.color.split('-')[1]}-500/20`}>
+            <Icon className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h3 className="text-lg md:text-xl font-bold text-gray-900">{category.label}</h3>
+            <h3 className="text-xl md:text-2xl font-bold text-gray-900">{category.label}</h3>
             <p className="text-sm text-gray-500">{filteredProperties.length} properties available</p>
           </div>
         </div>
         <Link 
           to={getFilterLink()} 
-          className="text-primary text-sm font-medium hover:underline flex items-center gap-1 bg-primary/5 px-4 py-2 rounded-full hover:bg-primary/10 transition-colors"
+          className="text-primary text-sm font-semibold flex items-center gap-1 bg-primary/10 px-5 py-2.5 rounded-full hover:bg-primary hover:text-white transition-all duration-300"
         >
           View All <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
       {/* Properties Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {displayProperties.map((property) => (
           <PropertyCard key={property.id} property={property} />
         ))}
@@ -144,14 +144,21 @@ export function FeaturedPropertiesTabs() {
   }
 
   return (
-    <section className="py-10 md:py-14 bg-gray-50">
-      <div className="container">
+    <section className="py-12 md:py-16 bg-gradient-to-b from-gray-50 via-white to-gray-50 relative overflow-hidden">
+      {/* Decorative Elements */}
+      <div className="absolute top-0 left-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+      
+      <div className="container relative z-10">
         {/* Main Title */}
-        <div className="text-center mb-10">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+        <div className="text-center mb-12">
+          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-sm font-semibold rounded-full mb-4">
+            Browse Categories
+          </span>
+          <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-3">
             Explore Properties by Category
           </h2>
-          <p className="text-gray-600">Find your perfect property from our wide range of listings</p>
+          <p className="text-gray-500 max-w-xl mx-auto">Find your perfect property from our wide range of listings</p>
         </div>
 
         {/* Category Sections */}

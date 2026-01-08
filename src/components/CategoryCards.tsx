@@ -91,26 +91,37 @@ export function CategoryCards() {
   }
 
   return (
-    <section className="py-10 md:py-14 bg-background">
-      <div className="container">
-        <div className="mb-section-header">
-          <h2 className="mb-section-title">We've got properties for everyone</h2>
+    <section className="py-12 md:py-16 bg-white relative overflow-hidden">
+      {/* Decorative background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40" />
+      
+      <div className="container relative z-10">
+        <div className="text-center mb-10">
+          <span className="inline-block px-4 py-1.5 bg-blue-500/10 text-blue-600 text-sm font-semibold rounded-full mb-4">
+            Quick Access
+          </span>
+          <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-3">We've got properties for everyone</h2>
+          <p className="text-gray-500">Explore our diverse collection of properties</p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
           {categories.map((category) => (
             <Link
               key={category.id}
               to={category.link}
-              className="mb-category-card aspect-[4/3]"
+              className="group relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
             >
-              <img src={category.image} alt={category.title} />
-              <div className="mb-category-overlay" />
-              <div className="mb-category-content">
-                <p className="text-2xl md:text-3xl font-bold">{category.count}</p>
-                <p className="text-sm md:text-base font-medium">{category.title}</p>
-                <span className="inline-flex items-center gap-1 text-sm mt-2 opacity-80 group-hover:opacity-100">
-                  Explore <ArrowRight className="h-4 w-4" />
+              <img 
+                src={category.image} 
+                alt={category.title} 
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+              <div className="absolute inset-0 flex flex-col justify-end p-5 text-white">
+                <p className="text-3xl md:text-4xl font-bold mb-1">{category.count}</p>
+                <p className="text-sm md:text-base font-medium opacity-90">{category.title}</p>
+                <span className="inline-flex items-center gap-1 text-sm mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  Explore <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </span>
               </div>
             </Link>
