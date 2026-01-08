@@ -209,22 +209,34 @@ const Properties = () => {
       <Header />
       
       <main className="flex-1 pb-20 md:pb-0">
-        {/* Page Header */}
-        <section className="hero-gradient text-primary-foreground py-12 md:py-16">
-          <div className="container">
-            <h1 className="text-2xl md:text-4xl font-bold mb-2">
-              {searchQuery ? `Search: "${searchQuery}"` : 
-               areaParam ? `Properties in ${areaParam}` :
-               featuredParam === 'true' ? 'Featured Properties' : 'All Properties'}
-            </h1>
-            <p className="text-primary-foreground/80">
-              {filteredProperties.length} properties found
-              {intent === 'buy' && ' for Sale'}
-              {intent === 'rent' && ' for Rent'}
-              {featuredParam === 'true' && ' (Featured)'}
-              {typeParam && ` - ${typeParam}`}
-              {areaParam && !searchQuery && ` in ${areaParam}`}
-            </p>
+        {/* Page Header with Background Image */}
+        <section className="relative py-16 md:py-24 overflow-hidden">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&q=80')`,
+            }}
+          />
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
+          
+          <div className="container relative z-10">
+            <div className="max-w-2xl">
+              <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
+                {searchQuery ? `Search: "${searchQuery}"` : 
+                 areaParam ? `Properties in ${areaParam}` :
+                 featuredParam === 'true' ? 'Featured Properties' : 'All Properties'}
+              </h1>
+              <p className="text-lg text-white/80">
+                {filteredProperties.length} properties found
+                {intent === 'buy' && ' for Sale'}
+                {intent === 'rent' && ' for Rent'}
+                {featuredParam === 'true' && ' (Featured)'}
+                {typeParam && ` - ${typeParam}`}
+                {areaParam && !searchQuery && ` in ${areaParam}`}
+              </p>
+            </div>
           </div>
         </section>
 

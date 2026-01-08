@@ -50,12 +50,26 @@ const About = () => {
       <Header />
       
       <main className="flex-1 pb-20 md:pb-0">
-        {/* Hero Section */}
-        <section className="hero-gradient text-primary-foreground py-16 md:py-24">
-          <div className="container">
+        {/* Hero Section with Background Image */}
+        <section className="relative py-20 md:py-32 overflow-hidden">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80')`,
+            }}
+          />
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
+          
+          <div className="container relative z-10">
             <div className="max-w-3xl">
-              <h1 className="text-3xl md:text-5xl font-bold mb-4">About Houses Adda</h1>
-              <p className="text-lg md:text-xl text-primary-foreground/80">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
+                <Building2 className="h-4 w-4 text-white" />
+                <span className="text-white/90 text-sm font-medium">Established 2014</span>
+              </div>
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">About Houses Adda</h1>
+              <p className="text-xl md:text-2xl text-white/80">
                 Your trusted partner in finding the perfect property in Hyderabad since 2014.
               </p>
             </div>
