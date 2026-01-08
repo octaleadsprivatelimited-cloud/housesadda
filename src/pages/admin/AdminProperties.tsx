@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
@@ -25,11 +25,13 @@ import {
 
 const AdminProperties = () => {
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [properties, setProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [transactionFilter, setTransactionFilter] = useState<string>('All');
+  const [statusFilter, setStatusFilter] = useState<string>(searchParams.get('filter') || 'all');
 
   useEffect(() => {
     loadProperties();
@@ -110,12 +112,23 @@ const AdminProperties = () => {
     }
   };
 
-  // Properties are already filtered by transactionType from API, so we only filter by search and type
+  // Properties are already filtered by transactionType from API, so we only filter by search, type, and status
   const filteredProperties = properties.filter(p => {
     const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          p.area?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType === 'all' || p.type?.toLowerCase() === filterType.toLowerCase();
-    return matchesSearch && matchesType;
+    
+    // Status filter (featured, active, inactive)
+    let matchesStatus = true;
+    if (statusFilter === 'featured') {
+      matchesStatus = p.isFeatured === true;
+    } else if (statusFilter === 'active') {
+      matchesStatus = p.isActive === true;
+    } else if (statusFilter === 'inactive') {
+      matchesStatus = p.isActive === false;
+    }
+    
+    return matchesSearch && matchesType && matchesStatus;
   });
 
   if (isLoading) {
@@ -142,6 +155,28 @@ const AdminProperties = () => {
         </Link>
       </div>
 
+      {/* Status Filter Banner */}
+      {statusFilter !== 'all' && (
+        <div className={`px-4 py-3 rounded-xl flex items-center justify-between ${
+          statusFilter === 'featured' ? 'bg-amber-100 text-amber-800' :
+          statusFilter === 'active' ? 'bg-green-100 text-green-800' :
+          'bg-red-100 text-red-800'
+        }`}>
+          <span className="font-medium">
+            Showing: {statusFilter === 'featured' ? 'Featured' : statusFilter === 'active' ? 'Active' : 'Inactive'} Properties
+          </span>
+          <button 
+            onClick={() => {
+              setStatusFilter('all');
+              setSearchParams({});
+            }}
+            className="text-sm underline hover:no-underline"
+          >
+            Clear Filter
+          </button>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
@@ -153,7 +188,24 @@ const AdminProperties = () => {
             className="pl-10 rounded-xl"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              if (e.target.value === 'all') {
+                setSearchParams({});
+              } else {
+                setSearchParams({ filter: e.target.value });
+              }
+            }}
+            className="px-4 py-2 rounded-xl border border-border bg-card text-sm"
+          >
+            <option value="all">All Status</option>
+            <option value="featured">Featured</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
           <select
             value={transactionFilter}
             onChange={(e) => setTransactionFilter(e.target.value)}

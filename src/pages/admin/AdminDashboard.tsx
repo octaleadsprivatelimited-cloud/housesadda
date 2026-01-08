@@ -110,7 +110,8 @@ const AdminDashboard = () => {
       icon: UserPlus,
       bgColor: 'bg-gradient-to-br from-teal-400 to-teal-500',
       barColor: 'bg-teal-200',
-      suffix: ''
+      suffix: '',
+      link: '/admin/properties'
     },
     { 
       label: 'Featured', 
@@ -118,7 +119,8 @@ const AdminDashboard = () => {
       icon: Users,
       bgColor: 'bg-gradient-to-br from-amber-400 to-amber-500',
       barColor: 'bg-amber-200',
-      suffix: ''
+      suffix: '',
+      link: '/admin/properties?filter=featured'
     },
     { 
       label: 'Active', 
@@ -126,7 +128,8 @@ const AdminDashboard = () => {
       icon: Search,
       bgColor: 'bg-gradient-to-br from-purple-400 to-purple-500',
       barColor: 'bg-purple-200',
-      suffix: ''
+      suffix: '',
+      link: '/admin/properties?filter=active'
     },
     { 
       label: 'Inactive', 
@@ -134,7 +137,8 @@ const AdminDashboard = () => {
       icon: Activity,
       bgColor: 'bg-gradient-to-br from-rose-400 to-rose-500',
       barColor: 'bg-rose-200',
-      suffix: ''
+      suffix: '',
+      link: '/admin/properties?filter=inactive'
     },
   ];
 
@@ -191,9 +195,10 @@ const AdminDashboard = () => {
       {/* Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map((stat) => (
-          <div 
+          <Link 
             key={stat.label}
-            className={`${stat.bgColor} rounded-xl p-4 text-white shadow-lg relative overflow-hidden`}
+            to={stat.link}
+            className={`${stat.bgColor} rounded-xl p-4 text-white shadow-lg relative overflow-hidden hover:scale-105 hover:shadow-xl transition-all cursor-pointer`}
           >
             <div className="flex items-start justify-between mb-2">
               <div>
@@ -203,7 +208,7 @@ const AdminDashboard = () => {
               <stat.icon className="h-8 w-8 text-white/50" />
             </div>
             <MiniBarChart color={stat.barColor} />
-          </div>
+          </Link>
         ))}
       </div>
 
