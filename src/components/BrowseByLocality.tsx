@@ -1,20 +1,70 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import { locationsAPI, propertiesAPI } from '@/lib/api';
 
-const localities = [
-  { name: 'Gachibowli', count: 45 },
-  { name: 'Hitech City', count: 62 },
-  { name: 'Kondapur', count: 38 },
-  { name: 'Jubilee Hills', count: 28 },
-  { name: 'Banjara Hills', count: 22 },
-  { name: 'Madhapur', count: 55 },
-  { name: 'Kukatpally', count: 41 },
-  { name: 'Miyapur', count: 33 },
-  { name: 'Financial District', count: 29 },
-  { name: 'Kompally', count: 25 },
-];
+interface Locality {
+  name: string;
+  count: number;
+}
 
 export function BrowseByLocality() {
+  const [localities, setLocalities] = useState<Locality[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadLocalities();
+  }, []);
+
+  const loadLocalities = async () => {
+    try {
+      setIsLoading(true);
+      // Fetch locations and properties count
+      const [locations, properties] = await Promise.all([
+        locationsAPI.getAll(),
+        propertiesAPI.getAll({ active: true })
+      ]);
+
+      // Count properties by area
+      const areaCounts: Record<string, number> = {};
+      properties.forEach((p: any) => {
+        const area = p.area || '';
+        if (area) {
+          areaCounts[area] = (areaCounts[area] || 0) + 1;
+        }
+      });
+
+      // Map locations with counts
+      const mappedLocalities = locations.map((l: any) => ({
+        name: l.name,
+        count: areaCounts[l.name] || 0,
+      }));
+
+      // Sort by count (most properties first) and take top 10
+      mappedLocalities.sort((a: Locality, b: Locality) => b.count - a.count);
+      setLocalities(mappedLocalities.slice(0, 10));
+    } catch (error) {
+      console.error('Error loading localities:', error);
+      setLocalities([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <section className="py-10 md:py-14 bg-secondary/30">
+        <div className="container flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </section>
+    );
+  }
+
+  if (localities.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-10 md:py-14 bg-secondary/30">
       <div className="container">

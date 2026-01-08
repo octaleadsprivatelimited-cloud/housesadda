@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, MapPin, Home, IndianRupee } from 'lucide-react';
+import { typesAPI } from '@/lib/api';
 
-const propertyTypes = ['Flat', 'House/Villa', 'Plot', 'Commercial'];
 const budgetRanges = ['Budget', 'Under 50L', '50L - 1Cr', '1Cr - 2Cr', '2Cr+'];
 
 interface SearchTabsProps {
@@ -10,8 +10,28 @@ interface SearchTabsProps {
 
 export function SearchTabs({ activeTab = 'buy' }: SearchTabsProps) {
   const [currentTab, setCurrentTab] = useState(activeTab);
-  const [selectedType, setSelectedType] = useState('Flat');
+  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
+  const [selectedType, setSelectedType] = useState('');
   const [selectedBudget, setSelectedBudget] = useState('Budget');
+
+  useEffect(() => {
+    loadPropertyTypes();
+  }, []);
+
+  const loadPropertyTypes = async () => {
+    try {
+      const types = await typesAPI.getAll();
+      const typeNames = types.map((t: any) => t.name);
+      setPropertyTypes(typeNames);
+      if (typeNames.length > 0) {
+        setSelectedType(typeNames[0]);
+      }
+    } catch (error) {
+      console.error('Error loading property types:', error);
+      setPropertyTypes(['Apartment', 'Villa', 'Plot', 'Commercial']);
+      setSelectedType('Apartment');
+    }
+  };
 
   const tabs = [
     { id: 'buy', label: 'Buy' },

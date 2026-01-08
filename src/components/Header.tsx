@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Phone, ChevronDown, User, MapPin } from 'lucide-react';
+import { Menu, X, Phone, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-const cities = ['Hyderabad', 'Secunderabad', 'Gachibowli', 'Hitech City', 'Kondapur'];
 
 const navLinks = [
   { label: 'Buy', href: '/properties?intent=buy' },
@@ -15,8 +13,6 @@ const navLinks = [
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedCity, setSelectedCity] = useState('Hyderabad');
-  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50">
@@ -31,37 +27,6 @@ export function Header() {
                 <span className="text-foreground font-bold text-lg">Adda</span>
               </div>
             </Link>
-
-            {/* City Selector */}
-            <div className="relative hidden sm:block">
-              <button
-                onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-                className="flex items-center gap-1 text-white/90 hover:text-white text-sm"
-              >
-                <MapPin className="h-4 w-4" />
-                {selectedCity}
-                <ChevronDown className="h-4 w-4" />
-              </button>
-              
-              {isCityDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border py-2 z-50">
-                  {cities.map((city) => (
-                    <button
-                      key={city}
-                      onClick={() => {
-                        setSelectedCity(city);
-                        setIsCityDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-secondary transition-colors ${
-                        city === selectedCity ? 'text-primary font-medium' : 'text-foreground'
-                      }`}
-                    >
-                      {city}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-4">
@@ -108,26 +73,6 @@ export function Header() {
       {isMenuOpen && (
         <div className="md:hidden bg-card border-b border-border animate-fade-in">
           <div className="container py-4">
-            {/* Mobile City Selector */}
-            <div className="mb-4 pb-4 border-b border-border">
-              <p className="text-xs text-muted-foreground mb-2">Select City</p>
-              <div className="flex flex-wrap gap-2">
-                {cities.slice(0, 4).map((city) => (
-                  <button
-                    key={city}
-                    onClick={() => setSelectedCity(city)}
-                    className={`px-3 py-1.5 rounded-full text-sm ${
-                      city === selectedCity
-                        ? 'bg-primary text-white'
-                        : 'bg-secondary text-foreground'
-                    }`}
-                  >
-                    {city}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <nav className="space-y-1">
               {navLinks.map((link) => (
                 <Link
