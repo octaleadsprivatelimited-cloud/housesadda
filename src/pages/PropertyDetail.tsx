@@ -516,18 +516,37 @@ const PropertyDetail = () => {
               {/* Location Map */}
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Location</h2>
-                <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 mb-4">
-                  <iframe
-                    src={propertyData.mapUrl}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Property Location"
-                  />
-                </div>
+                {propertyData.mapUrl && propertyData.mapUrl.includes('google.com/maps') ? (
+                  <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 mb-4">
+                    <iframe
+                      src={propertyData.mapUrl}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="Property Location"
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 mb-4 flex flex-col items-center justify-center">
+                    <div className="p-4 bg-white rounded-full shadow-lg mb-4">
+                      <MapPin className="h-10 w-10 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">{propertyData.area}</h3>
+                    <p className="text-gray-600 mb-4">{propertyData.city}</p>
+                    <a
+                      href={`https://www.google.com/maps/search/${encodeURIComponent(propertyData.area + ', ' + propertyData.city)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-full font-medium hover:bg-primary/90 transition-colors shadow-lg"
+                    >
+                      <MapPin className="h-4 w-4" />
+                      Open in Google Maps
+                    </a>
+                  </div>
+                )}
                 <a
                   href={`https://www.google.com/maps/search/${encodeURIComponent(propertyData.area + ', ' + propertyData.city)}`}
                   target="_blank"
