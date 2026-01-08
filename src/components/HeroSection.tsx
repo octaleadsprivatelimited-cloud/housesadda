@@ -21,14 +21,6 @@ export function HeroSection() {
       {/* Content */}
       <div className="container relative z-10 py-16">
         <div className="max-w-4xl mx-auto text-center mb-10">
-          {/* Main Title */}
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
-            Properties for the{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-red-400" style={{ fontFamily: 'Georgia, serif' }}>
-              Global Indian!
-            </span>
-          </h1>
-          
           {/* Subtitle */}
           <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl mx-auto">
             Discover premium properties in Hyderabad - Apartments, Villas, Plots & Commercial spaces
