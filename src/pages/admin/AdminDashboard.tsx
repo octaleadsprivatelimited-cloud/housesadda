@@ -13,8 +13,6 @@ import {
   Key,
   FileText,
   Users,
-  DollarSign,
-  Activity,
   Calendar,
   MapPin,
   BarChart3,
@@ -38,7 +36,6 @@ const AdminDashboard = () => {
   ]);
   const [recentProperties, setRecentProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [totalValue, setTotalValue] = useState(0);
 
   useEffect(() => {
     loadDashboardData();
@@ -59,10 +56,6 @@ const AdminDashboard = () => {
       
       const activeProperties = filteredProperties.filter((p: any) => p.isActive);
       const featuredProperties = filteredProperties.filter((p: any) => p.isFeatured);
-      
-      // Calculate total value
-      const total = filteredProperties.reduce((sum: number, p: any) => sum + (p.price || 0), 0);
-      setTotalValue(total);
 
       setStats([
         { 
@@ -131,17 +124,6 @@ const AdminDashboard = () => {
 
   const formatPrice = (price: number) => {
     if (price >= 10000000) {
-      return `₹${(price / 10000000).toFixed(2)} Cr`;
-    } else if (price >= 100000) {
-      return `₹${(price / 100000).toFixed(2)} L`;
-    }
-    return `₹${price.toLocaleString('en-IN')}`;
-  };
-
-  const formatTotalValue = (price: number) => {
-    if (price >= 100000000) {
-      return `₹${(price / 100000000).toFixed(2)} Cr`;
-    } else if (price >= 10000000) {
       return `₹${(price / 10000000).toFixed(2)} Cr`;
     } else if (price >= 100000) {
       return `₹${(price / 100000).toFixed(2)} L`;
@@ -248,27 +230,6 @@ const AdminDashboard = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Total Portfolio Value Card - Compact */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-md p-3 text-white shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white/20 rounded flex items-center justify-center">
-              <DollarSign className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-white/90 text-xs font-medium leading-tight">Total Portfolio Value</p>
-              <p className="text-base font-bold leading-tight">
-                {formatTotalValue(totalValue)}
-              </p>
-            </div>
-          </div>
-          <div className="inline-flex items-center gap-1.5 bg-white/20 px-2 py-1 rounded">
-            <TrendingUp className="h-3.5 w-3.5" />
-            <span className="text-xs font-semibold">Active</span>
-          </div>
-        </div>
       </div>
 
       {/* Recent Properties */}
