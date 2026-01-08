@@ -20,12 +20,6 @@ export function HeroSection() {
       
       {/* Content */}
       <div className="container relative z-10 py-16">
-        <div className="max-w-4xl mx-auto text-center mb-10">
-          {/* Subtitle */}
-          <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-            Discover premium properties in Hyderabad - Apartments, Villas, Plots & Commercial spaces
-          </p>
-        </div>
 
         {/* Search Component */}
         <SearchTabs />
