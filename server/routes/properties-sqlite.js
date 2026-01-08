@@ -102,6 +102,7 @@ router.get('/', async (req, res) => {
         highlights: prop.highlights ? JSON.parse(prop.highlights) : [],
         brochureUrl: prop.brochure_url,
         mapUrl: prop.map_url,
+        videoUrl: prop.video_url,
         createdAt: prop.created_at
       };
     }));
@@ -153,6 +154,7 @@ router.get('/:id', async (req, res) => {
       highlights: prop.highlights ? JSON.parse(prop.highlights) : [],
       brochureUrl: prop.brochure_url,
       mapUrl: prop.map_url,
+      videoUrl: prop.video_url,
       createdAt: prop.created_at
     };
 
@@ -169,7 +171,7 @@ router.post('/', authenticateToken, async (req, res) => {
     const {
       title, type, city, area, price, bedrooms, bathrooms, sqft,
       description, images, isFeatured, isActive, amenities, highlights,
-      brochureUrl, mapUrl, transactionType
+      brochureUrl, mapUrl, videoUrl, transactionType
     } = req.body;
 
     console.log('Creating property with data:', { 
@@ -205,15 +207,15 @@ router.post('/', authenticateToken, async (req, res) => {
     const result = await dbRun(
       `INSERT INTO properties 
        (title, location_id, type_id, city, price, bedrooms, bathrooms, sqft, 
-        description, transaction_type, is_featured, is_active, amenities, highlights, brochure_url, map_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        description, transaction_type, is_featured, is_active, amenities, highlights, brochure_url, map_url, video_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title, location.id, typeRow.id, city || 'Hyderabad', parseFloat(price) || 0,
         parseInt(bedrooms) || 0, parseInt(bathrooms) || 0, parseInt(sqft) || 0, description || '',
         transactionType || 'Sale',
         isFeatured ? 1 : 0, isActive !== false ? 1 : 0,
         JSON.stringify(amenities || []), JSON.stringify(highlights || []),
-        brochureUrl || '', mapUrl || ''
+        brochureUrl || '', mapUrl || '', videoUrl || ''
       ]
     );
 
@@ -249,7 +251,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const {
       title, type, city, area, price, bedrooms, bathrooms, sqft,
       description, images, isFeatured, isActive, amenities, highlights,
-      brochureUrl, mapUrl, transactionType
+      brochureUrl, mapUrl, videoUrl, transactionType
     } = req.body;
 
     // Get location_id and type_id
@@ -273,7 +275,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
        title = ?, location_id = ?, type_id = ?, city = ?, price = ?,
        bedrooms = ?, bathrooms = ?, sqft = ?, description = ?,
        transaction_type = ?, is_featured = ?, is_active = ?, amenities = ?, highlights = ?,
-       brochure_url = ?, map_url = ?
+       brochure_url = ?, map_url = ?, video_url = ?
        WHERE id = ?`,
       [
         title, location.id, typeRow.id, city || 'Hyderabad', price,
@@ -281,7 +283,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
         transactionType || 'Sale',
         isFeatured ? 1 : 0, isActive ? 1 : 0,
         JSON.stringify(amenities || []), JSON.stringify(highlights || []),
-        brochureUrl || '', mapUrl || '', id
+        brochureUrl || '', mapUrl || '', videoUrl || '', id
       ]
     );
 

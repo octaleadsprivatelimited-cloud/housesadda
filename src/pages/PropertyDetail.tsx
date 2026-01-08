@@ -23,6 +23,7 @@ import {
   CheckCircle2,
   Star,
   Download,
+  Play,
 } from 'lucide-react';
 
 const PropertyDetail = () => {
@@ -176,6 +177,37 @@ const PropertyDetail = () => {
     );
   }
 
+  // Helper function to convert YouTube URL to embed URL
+  const getYouTubeEmbedUrl = (url: string) => {
+    if (!url) return null;
+    
+    // Already an embed URL
+    if (url.includes('youtube.com/embed/')) {
+      return url;
+    }
+    
+    // Extract video ID from various YouTube URL formats
+    let videoId = null;
+    
+    // youtu.be/VIDEO_ID
+    const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
+    if (shortMatch) videoId = shortMatch[1];
+    
+    // youtube.com/watch?v=VIDEO_ID
+    const watchMatch = url.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
+    if (watchMatch) videoId = watchMatch[1];
+    
+    // youtube.com/v/VIDEO_ID
+    const vMatch = url.match(/youtube\.com\/v\/([a-zA-Z0-9_-]+)/);
+    if (vMatch) videoId = vMatch[1];
+    
+    if (videoId) {
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    return null;
+  };
+
   const propertyData = {
     id: property.id,
     title: property.title,
@@ -189,6 +221,7 @@ const PropertyDetail = () => {
     sqft: property.sqft,
     isFeatured: property.isFeatured,
     brochureUrl: property.brochureUrl,
+    videoUrl: property.videoUrl,
     images: property.images && property.images.length > 0 
       ? property.images 
       : property.image 
@@ -439,6 +472,31 @@ const PropertyDetail = () => {
                   {propertyData.description}
                 </div>
               </div>
+
+              {/* Property Video */}
+              {propertyData.videoUrl && getYouTubeEmbedUrl(propertyData.videoUrl) && (
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-red-100 rounded-lg">
+                      <Play className="h-5 w-5 text-red-600" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900">Property Video</h2>
+                  </div>
+                  <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
+                    <iframe
+                      src={getYouTubeEmbedUrl(propertyData.videoUrl)!}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      loading="lazy"
+                      title="Property Video"
+                      className="w-full h-full"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Amenities */}
               {propertyData.amenities && propertyData.amenities.length > 0 && (

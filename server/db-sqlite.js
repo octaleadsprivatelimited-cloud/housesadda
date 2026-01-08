@@ -117,6 +117,18 @@ export async function initDatabase() {
       }
     }
 
+    // Add video_url column if it doesn't exist (for existing databases)
+    try {
+      await dbGet('SELECT video_url FROM properties LIMIT 1');
+    } catch (e) {
+      try {
+        await dbRun(`ALTER TABLE properties ADD COLUMN video_url TEXT`);
+        console.log('✅ Added video_url column to properties table');
+      } catch (alterError) {
+        console.log('Note: video_url column may already exist');
+      }
+    }
+
     await dbRun(`
       CREATE TABLE IF NOT EXISTS property_images (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

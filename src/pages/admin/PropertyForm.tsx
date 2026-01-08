@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Upload, X, Plus, Loader2, Image as ImageIcon, MapPin, Home, IndianRupee, FileText, Link2, Sparkles, ToggleLeft } from 'lucide-react';
+import { ArrowLeft, Upload, X, Plus, Loader2, Image as ImageIcon, MapPin, Home, IndianRupee, FileText, Link2, Sparkles, ToggleLeft, Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
@@ -34,6 +34,7 @@ const PropertyForm = () => {
     description: '',
     brochureUrl: '',
     mapUrl: '',
+    videoUrl: '',
     transactionType: 'Sale',
     isFeatured: false,
     isActive: true,
@@ -111,6 +112,7 @@ const PropertyForm = () => {
         description: property.description || '',
         brochureUrl: property.brochureUrl || '',
         mapUrl: property.mapUrl || '',
+        videoUrl: property.videoUrl || '',
         transactionType: property.transactionType || 'Sale',
         isFeatured: property.isFeatured || false,
         isActive: property.isActive !== undefined ? property.isActive : true,
@@ -212,6 +214,7 @@ const PropertyForm = () => {
         highlights: formData.highlights,
         brochureUrl: formData.brochureUrl,
         mapUrl: formData.mapUrl,
+        videoUrl: formData.videoUrl,
       };
 
       if (isEditMode && id) {
@@ -534,6 +537,21 @@ const PropertyForm = () => {
                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
               />
               <p className="text-xs text-gray-500 mt-1">Get embed URL from Google Maps → Share → Embed</p>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Youtube className="h-4 w-4 text-red-500" />
+                YouTube Video URL
+              </label>
+              <input
+                name="videoUrl"
+                value={formData.videoUrl}
+                onChange={handleChange}
+                placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-1">Paste any YouTube video link (regular or embed URL)</p>
             </div>
           </div>
         </div>
