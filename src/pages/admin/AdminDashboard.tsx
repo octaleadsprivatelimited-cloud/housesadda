@@ -161,53 +161,53 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-primary to-primary/90 rounded-lg p-5 text-white shadow-md">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-bold mb-1">Welcome back! 👋</h1>
-            <p className="text-white/90 text-sm">
-              {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
-            <p className="text-white/80 text-sm mt-1">
-              Here's an overview of your property portfolio.
-            </p>
+    <div className="space-y-2">
+      {/* Welcome Banner - Compact */}
+      <div className="bg-gradient-to-r from-primary to-primary/90 rounded-md p-3 text-white shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-4 w-4" />
+            <div>
+              <h1 className="text-sm font-bold leading-tight">Welcome back! 👋</h1>
+              <p className="text-white/80 text-xs leading-tight">
+                {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </p>
+            </div>
           </div>
           <Link to="/admin/properties/new">
-            <Button className="bg-white text-primary hover:bg-white/90 font-medium shadow-md px-4 py-2 text-sm">
-              <Plus className="h-4 w-4 mr-2" />
+            <Button className="bg-white text-primary hover:bg-white/90 font-medium shadow-sm px-3 py-1.5 h-auto text-xs">
+              <Plus className="h-3 w-3 mr-1" />
               Add Property
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
-        <div className="flex items-center gap-2 mb-3">
-          <BarChart3 className="h-4 w-4 text-primary" />
-          <h3 className="font-semibold text-sm text-gray-900">Filter by Transaction Type</h3>
+      {/* Filter Tabs - Compact */}
+      <div className="bg-white rounded-md p-2.5 shadow-sm border border-gray-200">
+        <div className="flex items-center gap-2 mb-2">
+          <BarChart3 className="h-3.5 w-3.5 text-primary" />
+          <h3 className="font-semibold text-xs text-gray-900">Filter:</h3>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {transactionTypes.map((type) => (
             <button
               key={type}
               onClick={() => setSelectedFilter(type)}
               className={`
-                px-4 py-2 rounded-lg text-sm font-medium transition-all
+                px-2.5 py-1 rounded-md text-xs font-medium transition-all
                 ${selectedFilter === type 
-                  ? 'bg-primary text-white shadow-md' 
+                  ? 'bg-primary text-white shadow-sm' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }
               `}
             >
-              <span className="flex items-center gap-1.5">
-                {type === 'All' && <Building2 className="h-3.5 w-3.5" />}
-                {type === 'Sale' && <Home className="h-3.5 w-3.5" />}
-                {type === 'Rent' && <Key className="h-3.5 w-3.5" />}
-                {type === 'Lease' && <FileText className="h-3.5 w-3.5" />}
-                {type === 'PG' && <Users className="h-3.5 w-3.5" />}
+              <span className="flex items-center gap-1">
+                {type === 'All' && <Building2 className="h-3 w-3" />}
+                {type === 'Sale' && <Home className="h-3 w-3" />}
+                {type === 'Rent' && <Key className="h-3 w-3" />}
+                {type === 'Lease' && <FileText className="h-3 w-3" />}
+                {type === 'PG' && <Users className="h-3 w-3" />}
                 {type}
               </span>
             </button>
@@ -215,61 +215,57 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats Grid - Compact */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
         {stats.map((stat, index) => (
           <div 
             key={stat.label} 
             className={`
-              relative overflow-hidden rounded-xl p-4 
-              bg-white border-2 ${stat.borderColor}
-              shadow-md hover:shadow-lg hover:border-opacity-60 transition-all
-              group
+              relative overflow-hidden rounded-md p-2.5 
+              bg-white border ${stat.borderColor}
+              shadow-sm hover:shadow-md transition-all
             `}
           >
             {/* Gradient accent bar */}
-            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${stat.color}`}></div>
+            <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${stat.color}`}></div>
             
-            <div className="flex items-start justify-between mb-3">
-              <div className={`p-2.5 rounded-lg bg-gradient-to-br ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>
-                <stat.icon className="h-5 w-5 text-white" />
+            <div className="flex items-center justify-between mb-2 mt-0.5">
+              <div className={`p-1.5 rounded bg-gradient-to-br ${stat.color} shadow-sm`}>
+                <stat.icon className="h-3.5 w-3.5 text-white" />
               </div>
             </div>
             
             <div>
-              <p className={`text-2xl font-bold ${stat.textColor} mb-1`}>
+              <p className={`text-lg font-bold ${stat.textColor} leading-tight mb-0.5`}>
                 {stat.value}
               </p>
-              <p className="text-sm font-semibold text-gray-800 mb-1.5">
+              <p className="text-xs font-medium text-gray-800 leading-tight mb-1">
                 {stat.label}
               </p>
-              <div className="flex items-center gap-1.5">
-                <div className={`w-1.5 h-1.5 rounded-full ${stat.textColor}`}></div>
-                <p className={`text-xs ${stat.textColor} font-medium`}>
-                  {stat.change}
-                </p>
-              </div>
+              <p className={`text-xs ${stat.textColor} opacity-70 leading-tight`}>
+                {stat.change}
+              </p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Total Portfolio Value Card */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-5 text-white shadow-md">
+      {/* Total Portfolio Value Card - Compact */}
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-md p-3 text-white shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-5 w-5" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-white/20 rounded flex items-center justify-center">
+              <DollarSign className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-white/90 text-xs font-medium">Total Portfolio Value</p>
-              <p className="text-xl font-bold mt-0.5">
+              <p className="text-white/90 text-xs font-medium leading-tight">Total Portfolio Value</p>
+              <p className="text-base font-bold leading-tight">
                 {formatTotalValue(totalValue)}
               </p>
             </div>
           </div>
-          <div className="inline-flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg">
-            <TrendingUp className="h-4 w-4" />
+          <div className="inline-flex items-center gap-1.5 bg-white/20 px-2 py-1 rounded">
+            <TrendingUp className="h-3.5 w-3.5" />
             <span className="text-xs font-semibold">Active</span>
           </div>
         </div>

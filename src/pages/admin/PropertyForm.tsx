@@ -1,16 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Upload, X, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Upload, X, Plus, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { propertiesAPI } from '@/lib/api';
-
-const propertyTypes = ['Apartment', 'Villa', 'Plot', 'Commercial'];
-const cities = ['Hyderabad'];
-const areas = ['Gachibowli', 'Hitech City', 'Kondapur', 'Jubilee Hills', 'Banjara Hills', 'Madhapur', 'Kukatpally', 'Miyapur', 'Kompally', 'Financial District', 'Shamirpet'];
+import { propertiesAPI, typesAPI, locationsAPI } from '@/lib/api';
 
 const PropertyForm = () => {
   const navigate = useNavigate();
@@ -20,6 +16,12 @@ const PropertyForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const isEditMode = !!id;
+  
+  // Dynamic data from API
+  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [areas, setAreas] = useState<string[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -44,11 +46,59 @@ const PropertyForm = () => {
   const [newAmenity, setNewAmenity] = useState('');
   const [newHighlight, setNewHighlight] = useState('');
 
+  // Load property types, cities, and areas from API
+  useEffect(() => {
+    loadFormData();
+  }, []);
+
   useEffect(() => {
     if (isEditMode) {
       loadProperty();
     }
   }, [id]);
+
+  const loadFormData = async () => {
+    try {
+      setIsLoadingData(true);
+      
+      // Fetch property types
+      const typesData = await typesAPI.getAll();
+      const typeNames = typesData.map((t: any) => t.name);
+      setPropertyTypes(typeNames);
+      
+      // Fetch locations (cities and areas)
+      const locationsData = await locationsAPI.getAll();
+      
+      // Extract unique cities
+      const uniqueCities = [...new Set(locationsData.map((l: any) => l.city))] as string[];
+      setCities(uniqueCities);
+      
+      // Extract all areas
+      const allAreas = locationsData.map((l: any) => l.name);
+      setAreas(allAreas);
+      
+      // Set default values if available
+      if (typeNames.length > 0 && !formData.type) {
+        setFormData(prev => ({ ...prev, type: typeNames[0] }));
+      }
+      if (uniqueCities.length > 0 && !formData.city) {
+        setFormData(prev => ({ ...prev, city: uniqueCities[0] }));
+      }
+    } catch (error) {
+      console.error('Error loading form data:', error);
+      toast({
+        title: "Warning",
+        description: "Could not load property types and locations. Using defaults.",
+        variant: "destructive",
+      });
+      // Fallback to defaults
+      setPropertyTypes(['Apartment', 'Villa', 'Plot', 'Commercial']);
+      setCities(['Hyderabad']);
+      setAreas(['Gachibowli', 'Hitech City', 'Kondapur', 'Jubilee Hills', 'Banjara Hills']);
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
 
   const loadProperty = async () => {
     if (!id) return;
@@ -202,10 +252,13 @@ const PropertyForm = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingData) {
     return (
       <div className="max-w-4xl mx-auto flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading property...</p>
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
+          <p className="text-muted-foreground text-sm">Loading {isLoading ? 'property' : 'form data'}...</p>
+        </div>
       </div>
     );
   }
