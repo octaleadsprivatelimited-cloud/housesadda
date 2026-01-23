@@ -9,6 +9,7 @@ export function FeaturedProperties() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadFeaturedProperties();
@@ -86,6 +87,14 @@ export function FeaturedProperties() {
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 bg-red-50 rounded-2xl border border-red-200">
+            <p className="text-red-600 font-medium mb-2">Unable to load properties</p>
+            <p className="text-red-500 text-sm">{error}</p>
+            {error.includes('Supabase is not configured') && (
+              <p className="text-xs text-red-400 mt-2">Please configure environment variables in Vercel</p>
+            )}
           </div>
         ) : featuredProperties.length > 0 ? (
           <div

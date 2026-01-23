@@ -1,6 +1,16 @@
 // Frontend-only Supabase API - replaces backend API calls
 import { supabase, uploadFile } from './supabase';
 
+// Check if Supabase is properly configured
+const checkSupabaseConfig = () => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  
+  if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
+    throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+  }
+};
+
 // Properties API using Supabase
 export const supabasePropertiesAPI = {
   // Get all properties with filters
@@ -14,6 +24,8 @@ export const supabasePropertiesAPI = {
     transactionType?: string;
   }) => {
     try {
+      checkSupabaseConfig();
+      
       let query = supabase
         .from('properties')
         .select(`
@@ -66,7 +78,10 @@ export const supabasePropertiesAPI = {
 
       const { data: properties, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase query error:', error);
+        throw new Error(`Failed to fetch properties: ${error.message}`);
+      }
 
       // Format properties
       return (properties || []).map((prop: any) => {

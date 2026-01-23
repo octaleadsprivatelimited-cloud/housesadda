@@ -8,6 +8,7 @@ import { supabasePropertiesAPI } from '@/lib/supabase-api';
 export function LatestProperties() {
   const [latestProperties, setLatestProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadLatestProperties();
@@ -16,6 +17,7 @@ export function LatestProperties() {
   const loadLatestProperties = async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const data = await supabasePropertiesAPI.getAll({ active: true });
       
       // Sort by created date and take latest 6
@@ -42,8 +44,9 @@ export function LatestProperties() {
       }));
       
       setLatestProperties(transformed);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading latest properties:', error);
+      setError(error.message || 'Failed to load properties');
       setLatestProperties([]);
     } finally {
       setIsLoading(false);
@@ -76,6 +79,14 @@ export function LatestProperties() {
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 bg-red-50 rounded-2xl border border-red-200">
+            <p className="text-red-600 font-medium mb-2">Unable to load properties</p>
+            <p className="text-red-500 text-sm">{error}</p>
+            {error.includes('Supabase is not configured') && (
+              <p className="text-xs text-red-400 mt-2">Please configure environment variables in Vercel</p>
+            )}
           </div>
         ) : latestProperties.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
