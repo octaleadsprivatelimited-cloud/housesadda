@@ -48,24 +48,24 @@ function CustomDropdown({ label, icon, value, options, onChange, placeholder = '
   }, []);
 
   return (
-    <div ref={dropdownRef} className="relative flex-1">
+    <div ref={dropdownRef} className="relative flex-1 min-w-0">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all ${
+        className={`w-full flex items-center gap-2 md:gap-3 px-3 md:px-4 py-3 md:py-3.5 rounded-lg md:rounded-xl border-2 transition-all ${
           isOpen 
             ? 'border-primary bg-primary/5' 
             : 'border-gray-100 hover:border-gray-200 bg-white'
         }`}
       >
-        <span className={`${isOpen ? 'text-primary' : 'text-gray-400'}`}>{icon}</span>
-        <div className="flex-1 text-left">
-          <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">{label}</p>
-          <p className={`text-sm font-medium truncate ${selectedOption?.label ? 'text-gray-800' : 'text-gray-400'}`}>
+        <span className={`flex-shrink-0 ${isOpen ? 'text-primary' : 'text-gray-400'}`}>{icon}</span>
+        <div className="flex-1 text-left min-w-0">
+          <p className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-wider">{label}</p>
+          <p className={`text-xs md:text-sm font-medium truncate ${selectedOption?.label ? 'text-gray-800' : 'text-gray-400'}`}>
             {selectedOption?.label || placeholder}
           </p>
         </div>
-        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
@@ -82,8 +82,8 @@ function CustomDropdown({ label, icon, value, options, onChange, placeholder = '
                 value === option.value ? 'bg-primary/5 text-primary' : 'text-gray-700'
               }`}
             >
-              <span className="text-sm font-medium">{option.label}</span>
-              {value === option.value && <Check className="h-4 w-4 text-primary" />}
+              <span className="text-sm font-medium truncate">{option.label}</span>
+              {value === option.value && <Check className="h-4 w-4 text-primary flex-shrink-0 ml-2" />}
             </button>
           ))}
         </div>
@@ -161,18 +161,18 @@ export function SearchTabs() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4">
+    <div className="w-full max-w-5xl mx-auto px-4">
       {/* Transaction Type Tabs */}
-      <div className="flex justify-center mb-4">
-        <div className="inline-flex bg-white/80 backdrop-blur rounded-full p-1 shadow-lg border border-gray-100">
+      <div className="flex justify-center mb-4 md:mb-6">
+        <div className="inline-flex bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-lg border border-white/20">
           {transactionTypes.map((type) => (
             <button
               key={type.value}
               onClick={() => setSelectedTransaction(type.value)}
-              className={`px-5 py-2 rounded-full text-xs font-semibold transition-all ${
+              className={`px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap ${
                 selectedTransaction === type.value
                   ? 'bg-primary text-white shadow-md'
-                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               {type.label}
@@ -182,8 +182,8 @@ export function SearchTabs() {
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white rounded-xl shadow-2xl shadow-gray-200/50 p-3 md:p-4 border border-gray-100">
-        <div className="flex flex-col lg:flex-row gap-2">
+      <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl shadow-gray-200/50 p-3 md:p-4 lg:p-5 border border-gray-100">
+        <div className="flex flex-col md:flex-row gap-2 md:gap-3">
           {/* Area Dropdown */}
           <CustomDropdown
             label="Location"
@@ -217,9 +217,9 @@ export function SearchTabs() {
           {/* Search Button */}
           <button 
             onClick={handleSearch}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-red-500 hover:from-primary/90 hover:to-red-500/90 text-white font-semibold py-3 px-8 rounded-lg transition-all hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98] min-w-[120px] text-sm"
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-red-500 hover:from-primary/90 hover:to-red-500/90 text-white font-semibold py-3.5 md:py-3 px-6 md:px-8 rounded-lg md:rounded-xl transition-all hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98] min-w-[120px] md:min-w-[140px] text-sm md:text-base whitespace-nowrap"
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-4 w-4 md:h-5 md:w-5" />
             <span>Search</span>
           </button>
         </div>
@@ -227,8 +227,8 @@ export function SearchTabs() {
 
       {/* Popular Searches */}
       {areas.length > 1 && (
-        <div className="flex flex-wrap items-center justify-center gap-1.5 mt-4">
-          <span className="text-xs text-gray-400 font-medium">Popular:</span>
+        <div className="flex flex-wrap items-center justify-center gap-1.5 md:gap-2 mt-4 md:mt-5">
+          <span className="text-xs md:text-sm text-white/80 font-medium">Popular:</span>
           {areas.slice(1, 6).map((area) => (
             <button
               key={area.value}
@@ -236,7 +236,7 @@ export function SearchTabs() {
                 setSelectedArea(area.value);
                 setTimeout(handleSearch, 100);
               }}
-              className="px-3 py-1 text-xs text-gray-500 hover:text-white hover:bg-primary bg-white/80 backdrop-blur border border-gray-200 hover:border-primary rounded-full transition-all shadow-sm"
+              className="px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm text-white/90 hover:text-white hover:bg-primary/90 bg-white/10 backdrop-blur-sm border border-white/30 hover:border-primary rounded-full transition-all shadow-sm"
             >
               {area.label}
             </button>

@@ -243,124 +243,208 @@ const Properties = () => {
         {/* Filters & Content */}
         <section className="py-6 md:py-10">
           <div className="container">
-            {/* Filter Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              {/* Desktop Filters */}
-              <div className="hidden md:flex items-center gap-3">
-                {/* Area Filter */}
-                <div className="relative">
-                  <select
-                    value={selectedArea}
-                    onChange={(e) => setSelectedArea(e.target.value)}
-                    className="appearance-none bg-card border border-border rounded-xl px-4 py-2.5 pr-10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-                  >
-                    {areas.map((area) => (
-                      <option key={area} value={area}>{area}</option>
-                    ))}
-                  </select>
-                  <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+              {/* Desktop Sidebar Filters */}
+              <aside className="hidden lg:block lg:w-80 lg:flex-shrink-0">
+                <div className="sticky top-24 bg-card border border-border rounded-2xl p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-lg font-bold text-foreground">Filters</h2>
+                    {hasActiveFilters && (
+                      <Button variant="ghost" size="sm" onClick={clearFilters} className="text-destructive h-auto p-0">
+                        <X className="h-4 w-4 mr-1" />
+                        Clear
+                      </Button>
+                    )}
+                  </div>
 
-                {/* Type Filter */}
-                <div className="relative">
-                  <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value)}
-                    className="appearance-none bg-card border border-border rounded-xl px-4 py-2.5 pr-10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-                  >
-                    {propertyTypes.map((type) => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
-                  <Home className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
+                  <div className="space-y-6">
+                    {/* Area Filter */}
+                    <div>
+                      <label className="block text-sm font-semibold text-foreground mb-2.5">
+                        <MapPin className="inline h-4 w-4 mr-1.5 text-muted-foreground" />
+                        Location
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={selectedArea}
+                          onChange={(e) => setSelectedArea(e.target.value)}
+                          className="w-full appearance-none bg-background border border-border rounded-xl px-4 py-3 pr-10 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer transition-colors"
+                        >
+                          {areas.map((area) => (
+                            <option key={area} value={area}>{area}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      </div>
+                    </div>
 
-                {/* Budget Filter */}
-                <div className="relative">
-                  <select
-                    value={selectedBudget.label}
-                    onChange={(e) => setSelectedBudget(budgetRanges.find(b => b.label === e.target.value) || budgetRanges[0])}
-                    className="appearance-none bg-card border border-border rounded-xl px-4 py-2.5 pr-10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-                  >
-                    {budgetRanges.map((budget) => (
-                      <option key={budget.label} value={budget.label}>{budget.label}</option>
-                    ))}
-                  </select>
-                  <IndianRupee className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
+                    {/* Type Filter */}
+                    <div>
+                      <label className="block text-sm font-semibold text-foreground mb-2.5">
+                        <Home className="inline h-4 w-4 mr-1.5 text-muted-foreground" />
+                        Property Type
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={selectedType}
+                          onChange={(e) => setSelectedType(e.target.value)}
+                          className="w-full appearance-none bg-background border border-border rounded-xl px-4 py-3 pr-10 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer transition-colors"
+                        >
+                          {propertyTypes.map((type) => (
+                            <option key={type} value={type}>{type}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      </div>
+                    </div>
 
-                {hasActiveFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters} className="text-destructive">
-                    <X className="h-4 w-4 mr-1" />
-                    Clear
+                    {/* Budget Filter */}
+                    <div>
+                      <label className="block text-sm font-semibold text-foreground mb-2.5">
+                        <IndianRupee className="inline h-4 w-4 mr-1.5 text-muted-foreground" />
+                        Budget Range
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={selectedBudget.label}
+                          onChange={(e) => setSelectedBudget(budgetRanges.find(b => b.label === e.target.value) || budgetRanges[0])}
+                          className="w-full appearance-none bg-background border border-border rounded-xl px-4 py-3 pr-10 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer transition-colors"
+                        >
+                          {budgetRanges.map((budget) => (
+                            <option key={budget.label} value={budget.label}>{budget.label}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+
+              {/* Main Content Area */}
+              <div className="flex-1 min-w-0">
+                {/* Top Bar - Filters (Mobile) & View Toggle */}
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                  {/* Mobile Filter Button */}
+                  <Button
+                    variant="outline"
+                    className="lg:hidden"
+                    onClick={() => setShowFilters(true)}
+                  >
+                    <SlidersHorizontal className="h-4 w-4 mr-2" />
+                    Filters
+                    {hasActiveFilters && (
+                      <span className="ml-2 bg-accent text-accent-foreground text-xs px-2 py-0.5 rounded-full">
+                        Active
+                      </span>
+                    )}
                   </Button>
-                )}
-              </div>
 
-              {/* Mobile Filter Button */}
-              <Button
-                variant="outline"
-                className="md:hidden"
-                onClick={() => setShowFilters(true)}
-              >
-                <SlidersHorizontal className="h-4 w-4 mr-2" />
-                Filters
-                {hasActiveFilters && (
-                  <span className="ml-2 bg-accent text-accent-foreground text-xs px-2 py-0.5 rounded-full">
-                    Active
-                  </span>
-                )}
-              </Button>
+                  {/* Desktop Top Filters Bar (Compact) */}
+                  <div className="hidden lg:flex items-center gap-3 flex-wrap">
+                    {/* Area Filter */}
+                    <div className="relative">
+                      <select
+                        value={selectedArea}
+                        onChange={(e) => setSelectedArea(e.target.value)}
+                        className="appearance-none bg-card border border-border rounded-lg px-3 py-2 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer min-w-[140px]"
+                      >
+                        {areas.map((area) => (
+                          <option key={area} value={area}>{area}</option>
+                        ))}
+                      </select>
+                      <MapPin className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                    </div>
 
-              {/* View Toggle */}
-              <div className="flex items-center gap-1 bg-secondary rounded-xl p-1">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-card shadow-sm' : ''}`}
-                >
-                  <Grid3X3 className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-card shadow-sm' : ''}`}
-                >
-                  <List className="h-5 w-5" />
-                </button>
+                    {/* Type Filter */}
+                    <div className="relative">
+                      <select
+                        value={selectedType}
+                        onChange={(e) => setSelectedType(e.target.value)}
+                        className="appearance-none bg-card border border-border rounded-lg px-3 py-2 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer min-w-[140px]"
+                      >
+                        {propertyTypes.map((type) => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </select>
+                      <Home className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                    </div>
+
+                    {/* Budget Filter */}
+                    <div className="relative">
+                      <select
+                        value={selectedBudget.label}
+                        onChange={(e) => setSelectedBudget(budgetRanges.find(b => b.label === e.target.value) || budgetRanges[0])}
+                        className="appearance-none bg-card border border-border rounded-lg px-3 py-2 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer min-w-[160px]"
+                      >
+                        {budgetRanges.map((budget) => (
+                          <option key={budget.label} value={budget.label}>{budget.label}</option>
+                        ))}
+                      </select>
+                      <IndianRupee className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                    </div>
+
+                    {hasActiveFilters && (
+                      <Button variant="ghost" size="sm" onClick={clearFilters} className="text-destructive">
+                        <X className="h-4 w-4 mr-1" />
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* View Toggle */}
+                  <div className="flex items-center gap-1 bg-secondary rounded-xl p-1 ml-auto">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-card shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                      aria-label="Grid view"
+                    >
+                      <Grid3X3 className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-card shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                      aria-label="List view"
+                    >
+                      <List className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Results Count */}
+                <p className="text-sm text-muted-foreground mb-6">
+                  Showing <span className="font-semibold text-foreground">{filteredProperties.length}</span> {filteredProperties.length === 1 ? 'property' : 'properties'}
+                </p>
+
+                {/* Loading State */}
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-16">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <span className="ml-3 text-muted-foreground">Loading properties...</span>
+                  </div>
+                ) : filteredProperties.length > 0 ? (
+                  <div className={viewMode === 'grid' 
+                    ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6'
+                    : 'flex flex-col gap-4'
+                  }>
+                    {filteredProperties.map((property) => (
+                      <PropertyCard key={property.id} property={property} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-16">
+                    <div className="text-6xl mb-4">🏠</div>
+                    <h3 className="text-xl font-semibold mb-2">No properties found</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Try adjusting your filters to see more results
+                    </p>
+                    <Button onClick={clearFilters} variant="outline">
+                      Clear All Filters
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
-
-            {/* Results Count */}
-            <p className="text-sm text-muted-foreground mb-6">
-              Showing {filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'}
-            </p>
-
-            {/* Loading State */}
-            {isLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-3 text-muted-foreground">Loading properties...</span>
-              </div>
-            ) : filteredProperties.length > 0 ? (
-              <div className={viewMode === 'grid' 
-                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'
-                : 'flex flex-col gap-4'
-              }>
-                {filteredProperties.map((property) => (
-                  <PropertyCard key={property.id} property={property} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <div className="text-6xl mb-4">🏠</div>
-                <h3 className="text-xl font-semibold mb-2">No properties found</h3>
-                <p className="text-muted-foreground mb-6">
-                  Try adjusting your filters to see more results
-                </p>
-                <Button onClick={clearFilters} variant="outline">
-                  Clear All Filters
-                </Button>
-              </div>
-            )}
           </div>
         </section>
 
