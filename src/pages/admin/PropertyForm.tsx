@@ -4,7 +4,8 @@ import { ArrowLeft, Upload, X, Plus, Loader2, Image as ImageIcon, MapPin, Home, 
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { propertiesAPI, typesAPI, locationsAPI } from '@/lib/api';
+import { supabasePropertiesAPI, supabaseTypesAPI, supabaseLocationsAPI } from '@/lib/supabase-api';
+import { uploadFile } from '@/lib/supabase';
 
 const PropertyForm = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const PropertyForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
+  const [uploadingImages, setUploadingImages] = useState<boolean[]>([]);
   const isEditMode = !!id;
   
   // Dynamic data from API
@@ -59,45 +61,33 @@ const PropertyForm = () => {
   const loadFormData = async () => {
     try {
       setIsLoadingData(true);
-      
-      const typesData = await typesAPI.getAll();
-      const typeNames = typesData.map((t: any) => t.name);
-      setPropertyTypes(typeNames);
-      
-      const locationsData = await locationsAPI.getAll();
-      const uniqueCities = [...new Set(locationsData.map((l: any) => l.city))] as string[];
+      const [typesData, locationsData] = await Promise.all([
+        supabaseTypesAPI.getAll(),
+        supabaseLocationsAPI.getAll()
+      ]);
+
+      setPropertyTypes(typesData.map((t: any) => t.name));
+      const uniqueCities = [...new Set(locationsData.map((l: any) => l.city))];
       setCities(uniqueCities);
-      
-      const allAreas = locationsData.map((l: any) => l.name);
-      setAreas(allAreas);
-      
-      if (typeNames.length > 0 && !formData.type) {
-        setFormData(prev => ({ ...prev, type: typeNames[0] }));
-      }
-      if (uniqueCities.length > 0 && !formData.city) {
-        setFormData(prev => ({ ...prev, city: uniqueCities[0] }));
-      }
-    } catch (error) {
-      console.error('Error loading form data:', error);
+      setAreas(locationsData.map((l: any) => l.name));
+    } catch (error: any) {
       toast({
-        title: "Warning",
-        description: "Could not load property types and locations. Using defaults.",
+        title: "Error",
+        description: error.message || "Failed to load form data",
         variant: "destructive",
       });
-      setPropertyTypes(['Apartment', 'Villa', 'Plot', 'Commercial']);
-      setCities(['Hyderabad']);
-      setAreas(['Gachibowli', 'Hitech City', 'Kondapur', 'Jubilee Hills', 'Banjara Hills']);
     } finally {
       setIsLoadingData(false);
     }
   };
+
 
   const loadProperty = async () => {
     if (!id) return;
     
     try {
       setIsLoading(true);
-      const property = await propertiesAPI.getById(id);
+      const property = await supabasePropertiesAPI.getById(id);
       
       setFormData({
         title: property.title || '',
@@ -140,19 +130,58 @@ const PropertyForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (e.target?.result) {
-            setImages(prev => [...prev, e.target!.result as string]);
-          }
-        };
-        reader.readAsDataURL(file);
-      });
+    if (!files || files.length === 0) return;
+
+    const fileArray = Array.from(files);
+    const uploadPromises = fileArray.map(async (file, index) => {
+      try {
+        // Add placeholder while uploading
+        const placeholderIndex = images.length + index;
+        setUploadingImages(prev => {
+          const newArr = [...prev];
+          newArr[placeholderIndex] = true;
+          return newArr;
+        });
+
+        // Upload to Supabase Storage
+        const { url } = await uploadFile(file, 'admin-uploads', 'properties');
+        
+        // Add uploaded URL to images
+        setImages(prev => [...prev, url]);
+        
+        toast({
+          title: "Upload successful",
+          description: `${file.name} uploaded successfully`,
+        });
+
+        return url;
+      } catch (error: any) {
+        console.error('Upload error:', error);
+        toast({
+          title: "Upload failed",
+          description: `Failed to upload ${file.name}: ${error.message}`,
+          variant: "destructive",
+        });
+        throw error;
+      } finally {
+        setUploadingImages(prev => {
+          const newArr = [...prev];
+          newArr[images.length + index] = false;
+          return newArr;
+        });
+      }
+    });
+
+    try {
+      await Promise.all(uploadPromises);
+    } catch (error) {
+      // Individual errors already handled
     }
+
+    // Reset file input
+    e.target.value = '';
   };
 
   const removeImage = (index: number) => {
@@ -218,13 +247,13 @@ const PropertyForm = () => {
       };
 
       if (isEditMode && id) {
-        await propertiesAPI.update(id, propertyData);
+        await supabasePropertiesAPI.update(id, propertyData);
         toast({
           title: "Property Updated!",
           description: "Your property has been successfully updated.",
         });
       } else {
-        await propertiesAPI.create(propertyData);
+        await supabasePropertiesAPI.create(propertyData);
         toast({
           title: "Property Added!",
           description: "Your property has been successfully added.",
@@ -483,18 +512,26 @@ const PropertyForm = () => {
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                 {images.map((image, index) => (
                   <div key={index} className="relative aspect-video rounded-lg overflow-hidden group border border-gray-200">
-                    <img src={image} alt="" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                    {index === 0 && (
-                      <span className="absolute bottom-2 left-2 text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-medium">
-                        Cover
-                      </span>
+                    {uploadingImages[index] ? (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                      </div>
+                    ) : (
+                      <>
+                        <img src={image} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        {index === 0 && (
+                          <span className="absolute bottom-2 left-2 text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-medium">
+                            Cover
+                          </span>
+                        )}
+                      </>
                     )}
                   </div>
                 ))}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Building2, Loader2, Check, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { typesAPI, propertiesAPI } from '@/lib/api';
+import { supabaseTypesAPI, supabasePropertiesAPI } from '@/lib/supabase-api';
 
 const AdminTypes = () => {
   const { toast } = useToast();
@@ -21,13 +21,13 @@ const AdminTypes = () => {
   const loadTypes = async () => {
     try {
       setIsLoading(true);
-      const data = await typesAPI.getAll();
+      const data = await supabaseTypesAPI.getAll();
       setTypes(data);
       
       const counts: Record<string, number> = {};
       for (const type of data) {
         try {
-          const props = await propertiesAPI.getAll({ active: true, type: type.name });
+          const props = await supabasePropertiesAPI.getAll({ active: true, type: type.name });
           counts[type.name] = props.length;
         } catch {
           counts[type.name] = 0;
@@ -48,7 +48,7 @@ const AdminTypes = () => {
       return;
     }
     try {
-      await typesAPI.create(newType.trim());
+      await supabaseTypesAPI.create(newType.trim());
       toast({ title: "Added" });
       setNewType('');
       await loadTypes();
@@ -60,7 +60,7 @@ const AdminTypes = () => {
   const deleteType = async (id: number) => {
     if (!confirm('Delete this type?')) return;
     try {
-      await typesAPI.delete(id);
+      await supabaseTypesAPI.delete(id);
       toast({ title: "Deleted", variant: "destructive" });
       await loadTypes();
     } catch (error: any) {
@@ -76,7 +76,7 @@ const AdminTypes = () => {
   const saveEdit = async () => {
     if (!editingId || !editName.trim()) return;
     try {
-      await typesAPI.update(editingId, editName.trim());
+      await supabaseTypesAPI.update(editingId, editName.trim());
       toast({ title: "Updated" });
       setEditingId(null);
       await loadTypes();

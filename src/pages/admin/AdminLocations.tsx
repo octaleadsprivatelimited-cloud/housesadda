@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, MapPin, Loader2, X, Check, Building, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { locationsAPI, propertiesAPI } from '@/lib/api';
+import { supabaseLocationsAPI, supabasePropertiesAPI } from '@/lib/supabase-api';
 
 const AdminLocations = () => {
   const { toast } = useToast();
@@ -22,10 +22,10 @@ const AdminLocations = () => {
   const loadLocations = async () => {
     try {
       setIsLoading(true);
-      const data = await locationsAPI.getAll();
+      const data = await supabaseLocationsAPI.getAll();
       setLocations(data);
       
-      const props = await propertiesAPI.getAll({ active: true });
+      const props = await supabasePropertiesAPI.getAll({ active: true });
       const counts: Record<string, number> = {};
       data.forEach((loc: any) => {
         counts[loc.name] = props.filter((p: any) => p.area === loc.name).length;
@@ -54,7 +54,7 @@ const AdminLocations = () => {
     }
 
     try {
-      await locationsAPI.create(newLocation);
+      await supabaseLocationsAPI.create(newLocation);
       toast({ title: "Success", description: `${newLocation.name} added` });
       setNewLocation({ name: '', city: 'Hyderabad' });
       await loadLocations();
@@ -71,7 +71,7 @@ const AdminLocations = () => {
     if (!confirm('Delete this location?')) return;
 
     try {
-      await locationsAPI.delete(id);
+      await supabaseLocationsAPI.delete(id);
       toast({ title: "Deleted", variant: "destructive" });
       await loadLocations();
     } catch (error: any) {
@@ -92,7 +92,7 @@ const AdminLocations = () => {
     if (!editingLocation || !editData.name.trim()) return;
 
     try {
-      await locationsAPI.update(editingLocation, editData);
+      await supabaseLocationsAPI.update(editingLocation, editData);
       toast({ title: "Updated" });
       setEditingLocation(null);
       await loadLocations();

@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { propertiesAPI } from '@/lib/api';
+import { supabasePropertiesAPI } from '@/lib/supabase-api';
 
 const AdminProperties = () => {
   const { toast } = useToast();
@@ -38,7 +38,7 @@ const AdminProperties = () => {
       if (transactionFilter !== 'All') {
         params.transactionType = transactionFilter;
       }
-      const data = await propertiesAPI.getAll(params);
+      const data = await supabasePropertiesAPI.getAll(params);
       setProperties(data);
     } catch (error: any) {
       toast({
@@ -62,7 +62,7 @@ const AdminProperties = () => {
 
   const toggleFeatured = async (id: string, currentValue: boolean) => {
     try {
-      await propertiesAPI.toggleFeatured(id, !currentValue);
+      await supabasePropertiesAPI.toggleFeatured(id, !currentValue);
       await loadProperties();
       toast({ title: "Updated" });
     } catch (error: any) {
@@ -72,7 +72,7 @@ const AdminProperties = () => {
 
   const toggleActive = async (id: string, currentValue: boolean) => {
     try {
-      await propertiesAPI.toggleActive(id, !currentValue);
+      await supabasePropertiesAPI.toggleActive(id, !currentValue);
       await loadProperties();
       toast({ title: "Updated" });
     } catch (error: any) {
@@ -83,7 +83,7 @@ const AdminProperties = () => {
   const deleteProperty = async (id: string) => {
     if (!confirm('Delete this property?')) return;
     try {
-      await propertiesAPI.delete(id);
+      await supabasePropertiesAPI.delete(id);
       await loadProperties();
       toast({ title: "Deleted", variant: "destructive" });
     } catch (error: any) {
