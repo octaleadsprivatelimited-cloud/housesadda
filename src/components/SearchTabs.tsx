@@ -52,7 +52,7 @@ function CustomDropdown({ label, icon, value, options, onChange, placeholder = '
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-all ${
+        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all ${
           isOpen 
             ? 'border-primary bg-primary/5' 
             : 'border-gray-100 hover:border-gray-200 bg-white'
@@ -60,16 +60,16 @@ function CustomDropdown({ label, icon, value, options, onChange, placeholder = '
       >
         <span className={`${isOpen ? 'text-primary' : 'text-gray-400'}`}>{icon}</span>
         <div className="flex-1 text-left">
-          <p className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">{label}</p>
-          <p className={`text-xs font-medium truncate ${selectedOption?.label ? 'text-gray-800' : 'text-gray-400'}`}>
+          <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">{label}</p>
+          <p className={`text-sm font-medium truncate ${selectedOption?.label ? 'text-gray-800' : 'text-gray-400'}`}>
             {selectedOption?.label || placeholder}
           </p>
         </div>
-        <ChevronDown className={`h-3.5 w-3.5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-lg shadow-xl border border-gray-100 py-1.5 z-50 max-h-56 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
           {options.map((option) => (
             <button
               key={option.value}
@@ -78,12 +78,12 @@ function CustomDropdown({ label, icon, value, options, onChange, placeholder = '
                 onChange(option.value);
                 setIsOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 transition-colors ${
+              className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-gray-50 transition-colors ${
                 value === option.value ? 'bg-primary/5 text-primary' : 'text-gray-700'
               }`}
             >
-              <span className="text-xs font-medium">{option.label}</span>
-              {value === option.value && <Check className="h-3.5 w-3.5 text-primary" />}
+              <span className="text-sm font-medium">{option.label}</span>
+              {value === option.value && <Check className="h-4 w-4 text-primary" />}
             </button>
           ))}
         </div>
