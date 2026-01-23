@@ -1,4 +1,29 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Determine API base URL based on environment
+const getApiBaseUrl = () => {
+  // If VITE_API_URL is explicitly set, use it
+  if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'http://localhost:3001/api') {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Check if we're in production (not localhost)
+  const isProduction = window.location.hostname !== 'localhost' && 
+                       window.location.hostname !== '127.0.0.1' &&
+                       !window.location.hostname.startsWith('192.168.');
+  
+  // In production, use relative URL to avoid localhost issues
+  // This assumes the API is on the same domain or proxied via Vercel
+  if (isProduction) {
+    console.log('🌐 Using relative API URL for production');
+    return '/api';
+  }
+  
+  // In development, use localhost
+  console.log('🌐 Using localhost API URL for development');
+  return 'http://localhost:3001/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+console.log('🔗 API Base URL:', API_BASE_URL);
 
 // Helper function to get auth token
 const getAuthToken = (): string | null => {
