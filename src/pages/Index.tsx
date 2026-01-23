@@ -6,6 +6,7 @@ import { CategoryCards } from '@/components/CategoryCards';
 import { FeaturedProperties } from '@/components/FeaturedProperties';
 import { LatestProperties } from '@/components/LatestProperties';
 import { BrowseByLocality } from '@/components/BrowseByLocality';
+import { WhyChooseUs } from '@/components/WhyChooseUs';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { MobileActionBar } from '@/components/MobileActionBar';
 
@@ -16,11 +17,12 @@ const Index = () => {
       
       <main className="flex-1 pb-20 md:pb-0">
         <HeroSection />
-        <FeaturedPropertiesTabs />
         <CategoryCards />
+        <FeaturedPropertiesTabs />
         <FeaturedProperties />
         <BrowseByLocality />
         <LatestProperties />
+        <WhyChooseUs />
       </main>
 
       <Footer />
