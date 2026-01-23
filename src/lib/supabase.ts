@@ -4,19 +4,34 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ Missing Supabase environment variables');
-  console.error('Required: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+// Create Supabase client for frontend use
+// Use empty strings as fallback to prevent errors, but log warning
+let supabase;
+try {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('⚠️ Missing Supabase environment variables');
+    console.warn('Required: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+    console.warn('App will continue but Supabase features may not work');
+  }
+  
+  supabase = createClient(
+    supabaseUrl || 'https://placeholder.supabase.co', 
+    supabaseAnonKey || 'placeholder-key', 
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
+  );
+} catch (error) {
+  console.error('❌ Failed to initialize Supabase client:', error);
+  // Create a minimal client to prevent app crash
+  supabase = createClient('https://placeholder.supabase.co', 'placeholder-key');
 }
 
-// Create Supabase client for frontend use
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
-});
+export { supabase };
 
 // Helper to get current authenticated user
 export const getCurrentUser = async () => {
