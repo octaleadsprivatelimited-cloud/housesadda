@@ -52,9 +52,29 @@ export default async function handler(req, res) {
       .eq('username', username)
       .single();
 
-    if (userError || !user) {
-      console.log('❌ User not found:', username);
+    if (userError) {
+      console.error('❌ Supabase query error:', userError);
+      console.error('Error code:', userError.code);
+      console.error('Error message:', userError.message);
+      
+      // Check if table doesn't exist
+      if (userError.code === '42P01' || userError.message?.includes('does not exist')) {
+        return res.status(500).json({ 
+          error: 'Database not configured',
+          message: 'Admin users table does not exist. Please run the Supabase schema migration first.'
+        });
+      }
+      
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (!user) {
+      console.log('❌ User not found:', username);
+      console.log('💡 Tip: Admin user may not exist. Run /api/setup/admin to create it.');
+      return res.status(401).json({ 
+        error: 'Invalid credentials',
+        message: 'User not found. If this is your first deployment, you may need to create the admin user.'
+      });
     }
 
     // Verify password
