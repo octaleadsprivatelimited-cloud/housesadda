@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, ArrowRight, Loader2, Building2, Home, Store,
 import { PropertyCard, Property } from './PropertyCard';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { propertiesAPI } from '@/lib/api';
+import { supabasePropertiesAPI } from '@/lib/supabase-api';
 
 const categories = [
   { id: 'all', label: 'All Properties', filter: null, icon: Building2, color: 'from-blue-500 to-blue-600' },
@@ -87,7 +87,7 @@ export function FeaturedPropertiesTabs() {
   const loadAllProperties = async () => {
     try {
       setIsLoading(true);
-      const data = await propertiesAPI.getAll({ active: true });
+      const data = await supabasePropertiesAPI.getAll({ active: true });
       
       const transformed: Property[] = data.map((prop: any) => ({
         id: String(prop.id),

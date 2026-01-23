@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Home, IndianRupee, ChevronDown, Check } from 'lucide-react';
-import { typesAPI, locationsAPI } from '@/lib/api';
+import { supabaseTypesAPI, supabaseLocationsAPI } from '@/lib/supabase-api';
 
 const budgetRanges = [
   { label: 'Any Budget', value: '' },
@@ -109,14 +109,14 @@ export function SearchTabs() {
   const loadData = async () => {
     try {
       setIsLoading(true);
-      const types = await typesAPI.getAll();
+      const types = await supabaseTypesAPI.getAll();
       const typeOptions = [
         { label: 'All Types', value: '' },
         ...types.map((t: any) => ({ label: t.name, value: t.name }))
       ];
       setPropertyTypes(typeOptions);
       
-      const locations = await locationsAPI.getAll();
+      const locations = await supabaseLocationsAPI.getAll();
       const areaOptions = [
         { label: 'All Areas', value: '' },
         ...locations.map((l: any) => ({ label: l.name, value: l.name }))

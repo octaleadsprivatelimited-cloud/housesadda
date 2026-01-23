@@ -6,7 +6,7 @@ import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { MobileActionBar } from '@/components/MobileActionBar';
 import { PropertyCard, Property } from '@/components/PropertyCard';
 import { Button } from '@/components/ui/button';
-import { propertiesAPI } from '@/lib/api';
+import { supabasePropertiesAPI } from '@/lib/supabase-api';
 import { Loader2 } from 'lucide-react';
 import {
   ChevronLeft,
@@ -45,7 +45,7 @@ const PropertyDetail = () => {
   const loadProperty = async () => {
     try {
       setIsLoading(true);
-      const data = await propertiesAPI.getById(id!);
+      const data = await supabasePropertiesAPI.getById(id!);
       setProperty(data);
       if (data.images && data.images.length > 0) {
         setCurrentImage(0);
@@ -77,7 +77,7 @@ const PropertyDetail = () => {
       
       // Strategy 1: Same area + same transaction type
       if (areaToFilter) {
-        const areaData = await propertiesAPI.getAll({
+        const areaData = await supabasePropertiesAPI.getAll({
           active: true,
           transactionType: transactionType,
           area: areaToFilter,
@@ -87,7 +87,7 @@ const PropertyDetail = () => {
       
       // Strategy 2: If not enough, try same property type + transaction type
       if (similarData.length < 6 && propertyType) {
-        const typeData = await propertiesAPI.getAll({
+        const typeData = await supabasePropertiesAPI.getAll({
           active: true,
           transactionType: transactionType,
           type: propertyType,
@@ -101,7 +101,7 @@ const PropertyDetail = () => {
       
       // Strategy 3: If still not enough, try same transaction type only
       if (similarData.length < 6) {
-        const transactionData = await propertiesAPI.getAll({
+        const transactionData = await supabasePropertiesAPI.getAll({
           active: true,
           transactionType: transactionType,
         });
@@ -114,7 +114,7 @@ const PropertyDetail = () => {
       
       // Strategy 4: If still not enough, get any active properties
       if (similarData.length < 3) {
-        const allData = await propertiesAPI.getAll({ active: true });
+        const allData = await supabasePropertiesAPI.getAll({ active: true });
         const allFiltered = allData.filter((p: any) => 
           String(p.id) !== String(currentProperty.id) && 
           !similarData.some(s => String(s.id) === String(p.id))

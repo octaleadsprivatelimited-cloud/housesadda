@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { authAPI } from '@/lib/api';
+import { supabaseAuthAPI } from '@/lib/supabase-auth';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-      const response = await authAPI.login(credentials.username, credentials.password);
+      const response = await supabaseAuthAPI.login(credentials.username, credentials.password);
       
       // Store session in localStorage
       localStorage.setItem('adminSession', JSON.stringify({ 

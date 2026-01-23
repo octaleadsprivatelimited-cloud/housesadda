@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader2 } from 'lucide-react';
-import { locationsAPI, propertiesAPI } from '@/lib/api';
+import { supabaseLocationsAPI, supabasePropertiesAPI } from '@/lib/supabase-api';
 
 interface Locality {
   name: string;
@@ -21,8 +21,8 @@ export function BrowseByLocality() {
       setIsLoading(true);
       // Fetch locations and properties count
       const [locations, properties] = await Promise.all([
-        locationsAPI.getAll(),
-        propertiesAPI.getAll({ active: true })
+        supabaseLocationsAPI.getAll(),
+        supabasePropertiesAPI.getAll({ active: true })
       ]);
 
       // Count properties by area

@@ -1,0 +1,8 @@
+# Ignore API folder from Vercel deployment
+# This ensures Vercel doesn't treat it as serverless functions
+api/
+server/
+*.config.js
+.env
+.env.local
+

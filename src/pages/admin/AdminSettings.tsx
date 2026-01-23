@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Lock, Save, Eye, EyeOff, AlertCircle, Shield, Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { authAPI } from '@/lib/api';
+import { supabaseAuthAPI } from '@/lib/supabase-auth';
 
 const AdminSettings = () => {
   const navigate = useNavigate();
@@ -73,7 +73,7 @@ const AdminSettings = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await authAPI.updateCredentials(
+      const response = await supabaseAuthAPI.updateCredentials(
         formData.currentPassword,
         formData.newUsername || undefined,
         formData.newPassword || undefined

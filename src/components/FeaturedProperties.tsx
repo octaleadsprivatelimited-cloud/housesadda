@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, ArrowRight, Loader2 } from 'lucide-react';
 import { PropertyCard, Property } from './PropertyCard';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { propertiesAPI } from '@/lib/api';
+import { supabasePropertiesAPI } from '@/lib/supabase-api';
 
 export function FeaturedProperties() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -17,7 +17,7 @@ export function FeaturedProperties() {
   const loadFeaturedProperties = async () => {
     try {
       setIsLoading(true);
-      const data = await propertiesAPI.getAll({ featured: true, active: true });
+      const data = await supabasePropertiesAPI.getAll({ featured: true, active: true });
       
       const transformed: Property[] = data.slice(0, 5).map((prop: any) => ({
         id: String(prop.id),

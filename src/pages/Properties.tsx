@@ -6,7 +6,7 @@ import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { MobileActionBar } from '@/components/MobileActionBar';
 import { PropertyCard, Property } from '@/components/PropertyCard';
 import { Button } from '@/components/ui/button';
-import { propertiesAPI } from '@/lib/api';
+import { supabasePropertiesAPI } from '@/lib/supabase-api';
 import { 
   Grid3X3, 
   List, 
@@ -101,7 +101,7 @@ const Properties = () => {
       }
       
       console.log('🔍 Loading properties with params:', params);
-      const data = await propertiesAPI.getAll(params);
+      const data = await supabasePropertiesAPI.getAll(params);
       
       // Transform API data to Property format
       const transformedProperties: Property[] = data.map((prop: any) => ({
@@ -141,7 +141,7 @@ const Properties = () => {
   const loadLocationsAndTypes = async () => {
     try {
       const [locationsData, typesData] = await Promise.all([
-        propertiesAPI.getAll({ active: true }).then(props => {
+        supabasePropertiesAPI.getAll({ active: true }).then(props => {
           const uniqueAreas = new Set<string>(['All Areas']);
           props.forEach((p: any) => {
             if (p.area) uniqueAreas.add(p.area);

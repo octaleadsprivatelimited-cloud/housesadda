@@ -3,7 +3,7 @@ import { PropertyCard, Property } from './PropertyCard';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { propertiesAPI } from '@/lib/api';
+import { supabasePropertiesAPI } from '@/lib/supabase-api';
 
 export function LatestProperties() {
   const [latestProperties, setLatestProperties] = useState<Property[]>([]);
@@ -16,7 +16,7 @@ export function LatestProperties() {
   const loadLatestProperties = async () => {
     try {
       setIsLoading(true);
-      const data = await propertiesAPI.getAll({ active: true });
+      const data = await supabasePropertiesAPI.getAll({ active: true });
       
       // Sort by created date and take latest 6
       const sorted = data.sort((a: any, b: any) => 

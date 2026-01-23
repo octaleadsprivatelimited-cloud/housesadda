@@ -17,7 +17,7 @@ import {
   BarChart2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { propertiesAPI } from '@/lib/api';
+import { supabasePropertiesAPI } from '@/lib/supabase-api';
 
 const transactionTypes = ['All', 'Sale', 'Rent', 'Lease', 'PG'];
 
@@ -60,7 +60,7 @@ const AdminDashboard = () => {
         params.transactionType = selectedFilter;
       }
       
-      const allProperties = await propertiesAPI.getAll(params);
+      const allProperties = await supabasePropertiesAPI.getAll(params);
       const filteredProperties = allProperties;
       
       const activeProperties = filteredProperties.filter((p: any) => p.isActive);

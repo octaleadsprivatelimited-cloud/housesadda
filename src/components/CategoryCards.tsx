@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { propertiesAPI } from '@/lib/api';
+import { supabasePropertiesAPI } from '@/lib/supabase-api';
 
 interface Category {
   id: number;
@@ -29,7 +29,7 @@ export function CategoryCards() {
   const loadCategories = async () => {
     try {
       setIsLoading(true);
-      const properties = await propertiesAPI.getAll({ active: true });
+      const properties = await supabasePropertiesAPI.getAll({ active: true });
       
       // Count properties by different categories
       const totalCount = properties.length;

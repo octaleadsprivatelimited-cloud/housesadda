@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Building2, Home, Map, Store, Loader2, Trees, Wheat, Users, Building } from 'lucide-react';
-import { typesAPI, propertiesAPI } from '@/lib/api';
+import { supabaseTypesAPI, supabasePropertiesAPI } from '@/lib/supabase-api';
 
 // Icon and color mapping for property types
 const typeStyles: Record<string, { icon: any; color: string; description: string }> = {
@@ -40,8 +40,8 @@ export function BrowseByType() {
       setIsLoading(true);
       // Fetch types and properties count
       const [types, properties] = await Promise.all([
-        typesAPI.getAll(),
-        propertiesAPI.getAll({ active: true })
+        supabaseTypesAPI.getAll(),
+        supabasePropertiesAPI.getAll({ active: true })
       ]);
 
       // Count properties by type
