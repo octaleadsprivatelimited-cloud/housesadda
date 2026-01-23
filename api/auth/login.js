@@ -32,19 +32,18 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    // Import Supabase client
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      console.error('❌ Missing Supabase credentials');
-      return res.status(500).json({ error: 'Server configuration error' });
+    // Get Supabase client
+    let supabase;
+    try {
+      const { getSupabaseClient } = await import('../_helpers/supabase.js');
+      supabase = getSupabaseClient();
+    } catch (configError) {
+      console.error('❌ Configuration error:', configError.message);
+      return res.status(500).json({ 
+        error: 'Server configuration error',
+        message: configError.message
+      });
     }
-
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
 
     // Get admin user from Supabase
     const { data: user, error: userError } = await supabase

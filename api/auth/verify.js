@@ -33,12 +33,17 @@ export default async function handler(req, res) {
       process.env.JWT_SECRET || 'your-secret-key-change-in-production'
     );
 
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
+    let supabase;
+    try {
+      const { getSupabaseClient } = await import('../_helpers/supabase.js');
+      supabase = getSupabaseClient();
+    } catch (configError) {
+      console.error('❌ Configuration error:', configError.message);
+      return res.status(500).json({ 
+        error: 'Server configuration error',
+        message: configError.message
+      });
+    }
 
     const { data: user, error } = await supabase
       .from('admin_users')
