@@ -7,8 +7,10 @@ const checkSupabaseConfig = () => {
   const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
   
   if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
-    throw new Error('Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+    console.warn('⚠️ Supabase is not configured. Returning empty data.');
+    return false;
   }
+  return true;
 };
 
 // Properties API using Supabase
@@ -24,7 +26,9 @@ export const supabasePropertiesAPI = {
     transactionType?: string;
   }) => {
     try {
-      checkSupabaseConfig();
+      if (!checkSupabaseConfig()) {
+        return []; // Return empty array if Supabase not configured
+      }
       
       let query = supabase
         .from('properties')
@@ -122,6 +126,10 @@ export const supabasePropertiesAPI = {
   // Get single property
   getById: async (id: string) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       const { data: prop, error } = await supabase
         .from('properties')
         .select(`
@@ -172,6 +180,10 @@ export const supabasePropertiesAPI = {
   // Create property
   create: async (property: any) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       // Get location and type IDs
       const { data: location } = await supabase
         .from('locations')
@@ -244,6 +256,10 @@ export const supabasePropertiesAPI = {
   // Update property
   update: async (id: string, property: any) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       // Get location and type IDs
       const { data: location } = await supabase
         .from('locations')
@@ -324,6 +340,10 @@ export const supabasePropertiesAPI = {
   // Delete property
   delete: async (id: string) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       // Delete images first (CASCADE should handle this, but being explicit)
       await supabase
         .from('property_images')
@@ -347,6 +367,10 @@ export const supabasePropertiesAPI = {
   // Toggle featured
   toggleFeatured: async (id: string, isFeatured: boolean) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       const { error } = await supabase
         .from('properties')
         .update({ is_featured: isFeatured })
@@ -363,6 +387,10 @@ export const supabasePropertiesAPI = {
   // Toggle active
   toggleActive: async (id: string, isActive: boolean) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       const { error } = await supabase
         .from('properties')
         .update({ is_active: isActive })
@@ -381,6 +409,10 @@ export const supabasePropertiesAPI = {
 export const supabaseLocationsAPI = {
   getAll: async (city?: string) => {
     try {
+      if (!checkSupabaseConfig()) {
+        return []; // Return empty array if Supabase not configured
+      }
+      
       let query = supabase.from('locations').select('*');
       if (city) {
         query = query.eq('city', city);
@@ -398,6 +430,10 @@ export const supabaseLocationsAPI = {
 
   create: async (location: { name: string; city: string }) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       const { data, error } = await supabase
         .from('locations')
         .insert({ name: location.name, city: location.city })
@@ -414,6 +450,10 @@ export const supabaseLocationsAPI = {
 
   update: async (id: number, location: { name: string; city: string }) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       const { error } = await supabase
         .from('locations')
         .update({ name: location.name, city: location.city })
@@ -429,6 +469,10 @@ export const supabaseLocationsAPI = {
 
   delete: async (id: number) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       const { error } = await supabase
         .from('locations')
         .delete()
@@ -447,6 +491,10 @@ export const supabaseLocationsAPI = {
 export const supabaseTypesAPI = {
   getAll: async () => {
     try {
+      if (!checkSupabaseConfig()) {
+        return []; // Return empty array if Supabase not configured
+      }
+      
       const { data, error } = await supabase
         .from('property_types')
         .select('*')
@@ -462,6 +510,10 @@ export const supabaseTypesAPI = {
 
   create: async (name: string) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       const { data, error } = await supabase
         .from('property_types')
         .insert({ name })
@@ -478,6 +530,10 @@ export const supabaseTypesAPI = {
 
   update: async (id: number, name: string) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       const { error } = await supabase
         .from('property_types')
         .update({ name })
@@ -493,6 +549,10 @@ export const supabaseTypesAPI = {
 
   delete: async (id: number) => {
     try {
+      if (!checkSupabaseConfig()) {
+        throw new Error('Supabase is not configured');
+      }
+      
       const { error } = await supabase
         .from('property_types')
         .delete()
