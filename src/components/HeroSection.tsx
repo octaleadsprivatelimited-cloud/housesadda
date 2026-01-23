@@ -19,16 +19,16 @@ export function HeroSection() {
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
       
       {/* Content */}
-      <div className="container relative z-10 py-12 md:py-16 lg:py-20">
-        <div className="max-w-5xl mx-auto text-center mb-8 md:mb-10 lg:mb-12">
+      <div className="container relative z-10 py-16">
+        <div className="max-w-4xl mx-auto text-center mb-10">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 md:px-4 py-1.5 md:py-2 mb-4 md:mb-6">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-            <span className="text-white/90 text-xs md:text-sm font-medium">Find Your Dream Property Today</span>
+            <span className="text-white/90 text-sm font-medium">Find Your Dream Property Today</span>
           </div>
           
           {/* Main Title */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 md:mb-4 leading-tight px-4">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
             Properties for the{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-red-400" style={{ fontFamily: 'Georgia, serif' }}>
               Global Indian!
@@ -36,23 +36,23 @@ export function HeroSection() {
           </h1>
           
           {/* Subtitle */}
-          <p className="text-base md:text-lg lg:text-xl text-white/80 mb-6 md:mb-8 max-w-2xl mx-auto px-4">
+          <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl mx-auto">
             Discover premium properties in Hyderabad - Apartments, Villas, Plots & Commercial spaces
           </p>
           
           {/* Stats */}
-          <div className="flex flex-wrap justify-center gap-6 md:gap-8 mb-8 md:mb-10">
+          <div className="flex flex-wrap justify-center gap-8 mb-10">
             <div className="text-center">
-              <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-white">500+</div>
-              <div className="text-white/60 text-xs md:text-sm">Properties</div>
+              <div className="text-2xl md:text-3xl font-bold text-white">500+</div>
+              <div className="text-white/60 text-sm">Properties</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-white">50+</div>
-              <div className="text-white/60 text-xs md:text-sm">Locations</div>
+              <div className="text-2xl md:text-3xl font-bold text-white">50+</div>
+              <div className="text-white/60 text-sm">Locations</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-white">1000+</div>
-              <div className="text-white/60 text-xs md:text-sm">Happy Clients</div>
+              <div className="text-2xl md:text-3xl font-bold text-white">1000+</div>
+              <div className="text-white/60 text-sm">Happy Clients</div>
             </div>
           </div>
         </div>
