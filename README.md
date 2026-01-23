@@ -21,7 +21,7 @@ This project is built with:
 - **Backend:**
   - Node.js
   - Express
-  - SQLite (default) / MySQL (optional)
+  - SQLite (default) / MySQL / Supabase (optional)
   - JWT Authentication
   - bcryptjs
 
@@ -32,6 +32,7 @@ This project is built with:
 - Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 - SQLite (included with Node.js) - No additional setup needed!
 - MySQL Server (optional, for production use)
+- Supabase account (optional, for cloud database)
 
 ### Installation
 
@@ -62,6 +63,13 @@ npm install
    mysql -u root -p housesadda < database/schema.sql
    ```
    - Use `npm run dev:server:mysql` instead of `npm run dev:server`
+   
+   **For Supabase (Optional - Cloud Database):**
+   - See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed setup instructions
+   - Create a Supabase project at [supabase.com](https://supabase.com)
+   - Run the schema from `database/schema-supabase.sql` in Supabase SQL Editor
+   - Configure `.env` with your Supabase credentials
+   - Use `npm run dev:server:supabase` or `npm run dev:all:supabase`
 
 4. **Configure Environment Variables**
 
@@ -111,7 +119,9 @@ npm install
 - `npm run dev` - Start the frontend development server
 - `npm run dev:server` - Start the backend API server (SQLite)
 - `npm run dev:server:mysql` - Start the backend API server (MySQL)
+- `npm run dev:server:supabase` - Start the backend API server (Supabase)
 - `npm run dev:all` - Start both frontend and backend concurrently (SQLite)
+- `npm run dev:all:supabase` - Start both frontend and backend concurrently (Supabase)
 - `npm run build` - Build for production
 - `npm run preview` - Preview the production build
 - `npm run lint` - Run ESLint
@@ -192,6 +202,12 @@ The database (SQLite or MySQL) includes the following tables:
 **MySQL (Optional):**
 - Requires MySQL server setup
 - Use `database/schema.sql` for schema
+
+**Supabase (Optional - Cloud):**
+- Cloud-hosted PostgreSQL database
+- Free tier available
+- Use `database/schema-supabase.sql` for schema
+- See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for setup
 
 ## Production Deployment
 
