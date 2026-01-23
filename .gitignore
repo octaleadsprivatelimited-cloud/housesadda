@@ -31,3 +31,13 @@ dist-ssr
 # Database
 *.sql.backup
 *.db
+
+# Local admin setup scripts (using Supabase only)
+database/create-admin.js
+server/setup-admin.js
+server/test-db.js
+server/test-db-query.js
+server/test-filter.js
+server/test-api-filter.js
+server/migrate-add-transaction-type.js
+server/update-rent-properties.js

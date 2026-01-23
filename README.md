@@ -21,7 +21,7 @@ This project is built with:
 - **Backend:**
   - Node.js
   - Express
-  - SQLite (default) / MySQL / Supabase (optional)
+  - Supabase (PostgreSQL cloud database)
   - JWT Authentication
   - bcryptjs
 
@@ -30,9 +30,7 @@ This project is built with:
 ### Prerequisites
 
 - Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-- SQLite (included with Node.js) - No additional setup needed!
-- MySQL Server (optional, for production use)
-- Supabase account (optional, for cloud database)
+- Supabase account - [Sign up at supabase.com](https://supabase.com) (free tier available)
 
 ### Installation
 
@@ -47,50 +45,40 @@ cd housesadda
 npm install
 ```
 
-3. **Database Setup (SQLite - Default)**
+3. **Database Setup (Supabase - Required)**
 
-   SQLite database is automatically created on first run. No additional setup needed!
+   This project uses Supabase as the database. Admin users are automatically created via the database schema.
    
-   The database file will be created at: `database/housesadda.db`
-   
-   **For MySQL (Optional):**
-   - Create a MySQL database:
-   ```sql
-   CREATE DATABASE housesadda;
-   ```
-   - Run the schema file:
-   ```sh
-   mysql -u root -p housesadda < database/schema.sql
-   ```
-   - Use `npm run dev:server:mysql` instead of `npm run dev:server`
-   
-   **For Supabase (Optional - Cloud Database):**
+   **Setup Steps:**
    - See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed setup instructions
    - Create a Supabase project at [supabase.com](https://supabase.com)
    - Run the schema from `database/schema-supabase.sql` in Supabase SQL Editor
+   - The schema automatically creates the default admin user (admin/admin123)
    - Configure `.env` with your Supabase credentials
-   - Use `npm run dev:server:supabase` or `npm run dev:all:supabase`
 
 4. **Configure Environment Variables**
 
-   Create a `.env` file in the root directory:
+   Create a `.env` file in the root directory (copy from `.env.example`):
    ```env
-   # For SQLite (default - no DB config needed)
    NODE_ENV=development
    JWT_SECRET=your-secret-key-change-in-production
    PORT=3001
    VITE_API_URL=http://localhost:3001/api
    
-   # For MySQL (optional)
-   # DB_HOST=localhost
-   # DB_USER=root
-   # DB_PASSWORD=your_mysql_password
-   # DB_NAME=housesadda
+   # Supabase Configuration (Frontend)
+   VITE_SUPABASE_PROJECT_ID=your-project-id-here
+   VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key-here
+   VITE_SUPABASE_URL=https://your-project-id.supabase.co
+   
+   # Supabase Configuration (Backend)
+   SUPABASE_URL=https://your-project-id.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
+   SUPABASE_ANON_KEY=your-anon-key-here
    ```
 
 5. **Start the development servers**
 
-   - Start both frontend and backend (SQLite):
+   - Start both frontend and backend:
    ```sh
    npm run dev:all
    ```
@@ -100,11 +88,8 @@ npm install
    # Terminal 1 - Frontend
    npm run dev
 
-   # Terminal 2 - Backend (SQLite - default)
+   # Terminal 2 - Backend (Supabase)
    npm run dev:server
-   
-   # Or Backend (MySQL - if configured)
-   npm run dev:server:mysql
    ```
 
 ### Default Admin Credentials
@@ -117,16 +102,13 @@ npm install
 ## Available Scripts
 
 - `npm run dev` - Start the frontend development server
-- `npm run dev:server` - Start the backend API server (SQLite)
-- `npm run dev:server:mysql` - Start the backend API server (MySQL)
-- `npm run dev:server:supabase` - Start the backend API server (Supabase)
-- `npm run dev:all` - Start both frontend and backend concurrently (SQLite)
-- `npm run dev:all:supabase` - Start both frontend and backend concurrently (Supabase)
+- `npm run dev:server` - Start the backend API server (Supabase)
+- `npm run dev:all` - Start both frontend and backend concurrently
 - `npm run build` - Build for production
 - `npm run preview` - Preview the production build
 - `npm run lint` - Run ESLint
-- `npm run setup:admin` - Create/update admin user (MySQL only)
-- `npm run test:db` - Test database connection
+
+**Note:** Admin users are created automatically via the Supabase database schema. No manual setup needed.
 
 ## Project Structure
 
@@ -187,27 +169,19 @@ housesadda/
 
 ## Database Schema
 
-The database (SQLite or MySQL) includes the following tables:
-- `admin_users` - Admin user accounts
+The database (Supabase PostgreSQL) includes the following tables:
+- `admin_users` - Admin user accounts (created automatically via schema)
 - `properties` - Property listings (with transaction_type: Sale, Rent, Lease, PG)
 - `property_types` - Property type definitions
 - `locations` - Location/area data
 - `property_images` - Property image URLs
 
-**SQLite (Default):**
-- Database file: `database/housesadda.db`
-- Automatically created on first run
-- No configuration needed
-
-**MySQL (Optional):**
-- Requires MySQL server setup
-- Use `database/schema.sql` for schema
-
-**Supabase (Optional - Cloud):**
+**Supabase (Cloud PostgreSQL):**
 - Cloud-hosted PostgreSQL database
 - Free tier available
 - Use `database/schema-supabase.sql` for schema
-- See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for setup
+- Admin users are created automatically when you run the schema
+- See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed setup
 
 ## Production Deployment
 
@@ -228,8 +202,7 @@ Quick steps:
    pm2 start ecosystem.config.js
    ```
 
-5. For SQLite: Ensure database directory is writable
-6. For MySQL: Ensure MySQL is properly configured and secured
+5. For Supabase: Ensure environment variables are set correctly in your deployment platform
 
 ## Security Notes
 
